@@ -1,0 +1,31 @@
+{
+  "name": "bring-your-own-eval-safety",
+  "version": "1.0.0",
+  "description": "Custom evaluation server for LLM safety guardrail models",
+  "module": "script.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --hot script.ts",
+    "start": "bun script.ts"
+  },
+  "keywords": [
+    "evaluation",
+    "safety",
+    "guardrails",
+    "llm",
+    "prem-studio"
+  ],
+  "author": "Prem AI",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.4.0",
+    "elysia": "^1.4.15"
+  }
+}
