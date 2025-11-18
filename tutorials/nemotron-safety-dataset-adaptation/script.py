@@ -147,11 +147,16 @@ def main():
     dataset_name = "nvidia/Nemotron-Safety-Guard-Dataset-v3"
     split = "train"  # Can be "train", "validation", or "test"
     output_file = "converted_dataset.jsonl"
+    random_seed = 42  # Repeatable random seed
+    max_samples = 10000  # Only convert 10K samples
     
     print(f"1. Loading dataset: {dataset_name} (split: {split})...")
     try:
         dataset = load_dataset(dataset_name, split=split)
-        print(f"   ✓ Loaded {len(dataset)} entries\n")
+        if hasattr(dataset, '__len__'):
+            print(f"   ✓ Loaded {len(dataset)} entries\n")  # type: ignore
+        else:
+            print(f"   ✓ Dataset loaded\n")
     except Exception as e:
         print(f"   ✗ Error loading dataset: {e}")
         print("\n   Alternative: Download the dataset manually from Hugging Face")
@@ -159,9 +164,14 @@ def main():
         print("   Then modify the script to load from a local JSONL file.")
         sys.exit(1)
     
-    print(f"2. Converting entries to messages format...")
+    print(f"2. Shuffling dataset with seed {random_seed}...")
+    dataset = dataset.shuffle(seed=random_seed)
+    print(f"   ✓ Dataset shuffled\n")
+    
+    print(f"3. Converting {max_samples} entries to messages format...")
     converted_count = 0
     skipped_count = 0
+    processed_count = 0
     
     # Open output file for writing
     script_dir = Path(__file__).parent
@@ -169,6 +179,11 @@ def main():
     
     with open(output_path, "w", encoding="utf-8") as outfile:
         for entry in dataset:
+            # Stop if we've converted enough samples
+            if converted_count >= max_samples:
+                break
+            
+            processed_count += 1
             converted_entry = convert_entry(entry)
             
             if converted_entry is None:
@@ -181,15 +196,15 @@ def main():
             converted_count += 1
             
             # Progress indicator
-            if converted_count % 10000 == 0:
-                print(f"   Processed {converted_count} entries...")
+            if converted_count % 1000 == 0:
+                print(f"   Converted {converted_count}/{max_samples} entries...")
     
     print(f"   ✓ Converted {converted_count} entries")
     print(f"   ✓ Skipped {skipped_count} entries (REDACTED or empty)")
     print(f"   ✓ Output saved to: {output_path}\n")
     
     # Show sample entry
-    print("3. Sample converted entry:")
+    print("4. Sample converted entry:")
     with open(output_path, "r", encoding="utf-8") as infile:
         first_line = infile.readline()
         if first_line:
