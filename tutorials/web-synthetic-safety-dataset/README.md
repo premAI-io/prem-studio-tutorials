@@ -1,6 +1,6 @@
 # Generate Safety Classification Dataset from Web Sources
 
-**Tags:** `dataset` `finetuning` | `intermediate` | `safety`
+**Tags:** `dataset`, `finetuning` | `intermediate` | `safety`
 
 ## Prerequisites
 
@@ -8,9 +8,32 @@
 - Basic understanding of content moderation and safety classification
 - Python 3.8+ or Node.js 18+ installed
 
-**Python Setup:**
+## Setup Environment
+
+### Python
+
 ```bash
+# Create a virtual environment
+python -m venv venv
+
+# Activate the virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
+
+# Install dependencies
 pip install requests
+```
+
+### TypeScript
+
+```bash
+# Install dependencies using npm
+npm install
+
+# Or using bun (if available)
+bun install
 ```
 
 ## Outcome
@@ -73,9 +96,39 @@ Create snapshots from your datasets and launch fine-tuning jobs.
 
 See `script.ts` for complete implementation with both response and user prompt classification.
 
+**To run the TypeScript script:**
+
+```bash
+# Export your API key
+export API_KEY=your-api-key-here
+
+# Run the script using bun (recommended)
+bun script.ts
+
+# Or using Node.js with ts-node
+npx ts-node script.ts
+
+# Or using Node.js with tsx
+npx tsx script.ts
+```
+
 ### Python
 
 See `script.py` for complete implementation with both response and user prompt classification.
+
+**To run the Python script:**
+
+```bash
+# Export your API key
+export API_KEY=your-api-key-here
+
+# Make sure your virtual environment is activated
+source venv/bin/activate  # On macOS/Linux
+# venv\Scripts\activate   # On Windows
+
+# Run the script
+python script.py
+```
 
 ## Resources
 

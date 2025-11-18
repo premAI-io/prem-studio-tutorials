@@ -10,6 +10,9 @@ import json
 import time
 import requests
 
+# Base URL for Prem Studio API - change this to point to a different environment if needed
+BASE_URL = "https://studio.premai.io"
+
 API_KEY = os.getenv("API_KEY")
 
 # Load templates from JSON file
@@ -33,7 +36,7 @@ if not API_KEY:
 def api(endpoint: str, method: str = "GET", **kwargs):
     response = requests.request(
         method=method,
-        url=f"https://studio.premai.io{endpoint}",
+        url=f"{BASE_URL}{endpoint}",
         headers={"Authorization": f"Bearer {API_KEY}", **kwargs.pop("headers", {})},
         **kwargs
     )
@@ -44,58 +47,35 @@ def api(endpoint: str, method: str = "GET", **kwargs):
     return response.json()
 
 
-def create_response_safety_dataset(project_id: str):
-    """Create dataset for response safety classification"""
-    print("   Creating response safety dataset...")
+def create_synthetic_dataset(project_id: str, dataset_name: str, template_key: str):
+    """Create synthetic dataset with proper template and rules"""
+    print(f"   Creating {dataset_name}...")
 
-    template = TEMPLATES["response_safety"]
+    template = TEMPLATES[template_key]
     question_format = template["question_format"]
     answer_format = template["answer_format"]
+    rules = template["rules"]
 
-    form_data = {
-        "project_id": project_id,
-        "name": "Response Safety Classification Dataset",
-        "pairs_to_generate": "50",
-        "pair_type": "qa",
-        "temperature": "0.3",
-        "rules[]": template["rules"],
-        "question_format": question_format,
-        "answer_format": answer_format
-    }
+    # Prepare form data as list of tuples for multipart/form-data (allows duplicate keys for arrays)
+    form_data = [
+        ("project_id", project_id),
+        ("name", dataset_name),
+        ("pairs_to_generate", "50"),
+        ("temperature", "0.0"),
+        ("question_format", question_format),
+        ("answer_format", answer_format),
+        ("rules[]", rules),
+    ]
 
-    # Add web URLs
-    for i, url in enumerate(WEB_URLS):
-        form_data[f"web_urls[{i}]"] = url
+    # Add website URLs as array (each URL as separate entry with website_urls[idx] key, indexed like youtube_urls)
+    for idx, url in enumerate(WEB_URLS):
+        form_data.append((f"website_urls[{idx}]", url))
 
-    result = api("/api/v1/public/datasets/create-synthetic", method="POST", data=form_data)
+    # Use files parameter to force multipart/form-data encoding
+    result = api("/api/v1/public/datasets/create-synthetic", method="POST", data=form_data, files={})
     return result["dataset_id"]
 
 
-def create_user_prompt_safety_dataset(project_id: str):
-    """Create dataset for user prompt safety classification"""
-    print("   Creating user prompt safety dataset...")
-
-    template = TEMPLATES["user_prompt_safety"]
-    question_format = template["question_format"]
-    answer_format = template["answer_format"]
-
-    form_data = {
-        "project_id": project_id,
-        "name": "User Prompt Safety Classification Dataset",
-        "pairs_to_generate": "50",
-        "pair_type": "qa",
-        "temperature": "0.3",
-        "rules[]": template["rules"],
-        "question_format": question_format,
-        "answer_format": answer_format
-    }
-
-    # Add web URLs
-    for i, url in enumerate(WEB_URLS):
-        form_data[f"web_urls[{i}]"] = url
-
-    result = api("/api/v1/public/datasets/create-synthetic", method="POST", data=form_data)
-    return result["dataset_id"]
 
 
 def wait_for_dataset(dataset_id: str):
@@ -117,68 +97,55 @@ def main():
 
     # Create project
     print("1. Creating project...")
-    result = api(
+    project = api(
         "/api/v1/public/projects/create",
         method="POST",
         headers={"Content-Type": "application/json"},
         json={
             "name": "Safety Classification Project",
-            "goal": "Generate safety classification datasets for content moderation"
+            "goal": "Generate response safety classification dataset for content moderation"
         }
     )
-    project_id = result["project_id"]
+    project_id = project["project_id"]
     print(f"   ✓ Project: {project_id}\n")
 
     # Generate response safety dataset
     print("2. Generating response safety dataset...")
     print(f"   URLs: {len(WEB_URLS)} web sources")
-    response_dataset_id = create_response_safety_dataset(project_id)
-    print(f"   ✓ Dataset: {response_dataset_id}")
+    print(f"   Using response_safety template with {len(TEMPLATES['response_safety']['rules'])} rules")
+    dataset_id = create_synthetic_dataset(
+        project_id,
+        "Response Safety Classification Dataset",
+        "response_safety"
+    )
+    print(f"   ✓ Dataset: {dataset_id}")
     print("   Waiting for generation (may take 5-10 minutes)...")
-    response_dataset = wait_for_dataset(response_dataset_id)
-    print(f"   ✓ Ready: {response_dataset['datapoints_count']} datapoints\n")
+    dataset = wait_for_dataset(dataset_id)
+    print(f"   ✓ Ready: {dataset['datapoints_count']} datapoints\n")
 
-    # Generate user prompt safety dataset
-    print("3. Generating user prompt safety dataset...")
-    print(f"   URLs: {len(WEB_URLS)} web sources")
-    user_dataset_id = create_user_prompt_safety_dataset(project_id)
-    print(f"   ✓ Dataset: {user_dataset_id}")
-    print("   Waiting for generation (may take 5-10 minutes)...")
-    user_dataset = wait_for_dataset(user_dataset_id)
-    print(f"   ✓ Ready: {user_dataset['datapoints_count']} datapoints\n")
-
-    # Create snapshots
-    print("4. Creating snapshots...")
-    response_snapshot = api(
+    # Create snapshot
+    print("3. Creating snapshot...")
+    snapshot = api(
         "/api/v1/public/snapshots/create",
         method="POST",
         headers={"Content-Type": "application/json"},
-        json={"dataset_id": response_dataset_id, "split_percentage": 80}
+        json={"dataset_id": dataset_id, "split_percentage": 80}
     )
-    response_snapshot_id = response_snapshot["snapshot_id"]
-    print(f"   ✓ Response Safety Snapshot: {response_snapshot_id}")
-
-    user_snapshot = api(
-        "/api/v1/public/snapshots/create",
-        method="POST",
-        headers={"Content-Type": "application/json"},
-        json={"dataset_id": user_dataset_id, "split_percentage": 80}
-    )
-    user_snapshot_id = user_snapshot["snapshot_id"]
-    print(f"   ✓ User Prompt Safety Snapshot: {user_snapshot_id}\n")
+    snapshot_id = snapshot["snapshot_id"]
+    print(f"   ✓ Snapshot: {snapshot_id}\n")
 
     # Generate recommendations
-    print("5. Generating recommendations...")
+    print("4. Generating recommendations...")
     api(
         "/api/v1/public/recommendations/generate",
         method="POST",
         headers={"Content-Type": "application/json"},
-        json={"snapshot_id": response_snapshot_id}
+        json={"snapshot_id": snapshot_id}
     )
 
     while True:
         time.sleep(5)
-        recs = api(f"/api/v1/public/recommendations/{response_snapshot_id}")
+        recs = api(f"/api/v1/public/recommendations/{snapshot_id}")
         if recs["status"] != "processing":
             break
 
@@ -191,7 +158,7 @@ def main():
     print()
 
     # Create fine-tuning job
-    print("6. Creating fine-tuning job...")
+    print("5. Creating fine-tuning job...")
     experiments = [
         {k: v for k, v in exp.items() if k not in ["recommended", "reason_for_recommendation"]}
         for exp in recs["recommended_experiments"] if exp["recommended"]
@@ -206,7 +173,7 @@ def main():
         method="POST",
         headers={"Content-Type": "application/json"},
         json={
-            "snapshot_id": response_snapshot_id,
+            "snapshot_id": snapshot_id,
             "name": "Response Safety Model",
             "experiments": experiments
         }
@@ -215,7 +182,7 @@ def main():
     print(f"   ✓ Job: {job_id}\n")
 
     # Monitor (5 minutes max)
-    print("7. Monitoring job...")
+    print("6. Monitoring job...")
     for i in range(30):
         time.sleep(10)
         job = api(f"/api/v1/public/finetuning/{job_id}")
@@ -226,9 +193,8 @@ def main():
             break
 
     print("\n✓ Done!")
-    print(f"\nGenerated datasets:")
-    print(f"  - Response Safety: {response_dataset_id} ({response_dataset['datapoints_count']} datapoints)")
-    print(f"  - User Prompt Safety: {user_dataset_id} ({user_dataset['datapoints_count']} datapoints)")
+    print(f"\nGenerated dataset:")
+    print(f"  - Response Safety: {dataset_id} ({dataset['datapoints_count']} datapoints)")
     print(f"\nFine-tuning job: {job_id}\n")
 
 

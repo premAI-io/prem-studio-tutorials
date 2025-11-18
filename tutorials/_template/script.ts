@@ -3,6 +3,9 @@
  * [Brief description]
  */
 
+// Base URL for Prem Studio API - change this to point to a different environment if needed
+const BASE_URL = "https://studio.premai.io";
+
 const API_KEY = process.env.API_KEY;
 
 if (!API_KEY) {
@@ -11,7 +14,7 @@ if (!API_KEY) {
 }
 
 async function api(endpoint: string, method: string = "GET", options: RequestInit = {}) {
-  const response = await fetch(`https://studio.premai.io${endpoint}`, {
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
     method,
     headers: {
       Authorization: `Bearer ${API_KEY}`,
