@@ -133,7 +133,6 @@ python script.py
 ## Resources
 
 - [qa_templates.json](resources/qa_templates.json) - QA templates for both response and user prompt safety classification
-- [sample_dataset.jsonl](resources/sample_dataset.jsonl) - Sample output format
 
 ## Next Steps
 
