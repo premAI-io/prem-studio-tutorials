@@ -24,11 +24,12 @@ Each tutorial is organized in its own directory under `/tutorials/`, following t
 Each tutorial README includes:
 
 1. **Prerequisites** - Required knowledge or setup
-2. **Outcome** - What you'll achieve
-3. **Steps** - Detailed walkthrough with API endpoints
-4. **Code Snippets** - TypeScript and Python examples
-5. **Resources** - Sample files and datasets
-6. **Next Steps** - Related tutorials and learning paths
+2. **Setup Environment** - Environment setup instructions for Python and TypeScript
+3. **Outcome** - What you'll achieve
+4. **Steps** - Detailed walkthrough with API endpoints
+5. **Code Snippets** - TypeScript and Python examples with instructions on how to run the experiments
+6. **Resources** - Sample files and datasets
+7. **Next Steps** - Related tutorials and learning paths
 
 ## Tags
 

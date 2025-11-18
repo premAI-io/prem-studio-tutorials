@@ -7,6 +7,9 @@
 import os
 import requests
 
+# Base URL for Prem Studio API - change this to point to a different environment if needed
+BASE_URL = "https://studio.premai.io"
+
 API_KEY = os.getenv("API_KEY")
 
 if not API_KEY:
@@ -18,7 +21,7 @@ def api(endpoint: str, method: str = "GET", **kwargs):
     """Helper function for API calls"""
     response = requests.request(
         method=method,
-        url=f"https://studio.premai.io{endpoint}",
+        url=f"{BASE_URL}{endpoint}",
         headers={"Authorization": f"Bearer {API_KEY}", **kwargs.pop("headers", {})},
         **kwargs
     )

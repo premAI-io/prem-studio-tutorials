@@ -7,6 +7,9 @@
 import * as fs from "fs";
 import * as path from "path";
 
+// Base URL for Prem Studio API - change this to point to a different environment if needed
+const BASE_URL = "https://studio.premai.io";
+
 const API_KEY = process.env.API_KEY;
 
 // Load templates from JSON file
@@ -24,7 +27,7 @@ if (!API_KEY) {
 }
 
 async function api(endpoint: string, method: string = "GET", options: RequestInit = {}) {
-  const response = await fetch(`https://studio.premai.io${endpoint}`, {
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
     method,
     headers: {
       Authorization: `Bearer ${API_KEY}`,
@@ -46,62 +49,30 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function createResponseSafetyDataset(projectId: string) {
-  console.log("   Creating response safety dataset...");
+async function createSyntheticDataset(
+  projectId: string,
+  datasetName: string,
+  templateKey: "response_safety" | "user_prompt_safety"
+) {
+  console.log(`   Creating ${datasetName}...`);
 
-  const template = TEMPLATES.response_safety;
+  const template = TEMPLATES[templateKey];
   const questionFormat = template.question_format;
   const answerFormat = template.answer_format;
+  const rules = template.rules;
 
   const formData = new FormData();
   formData.append("project_id", projectId);
-  formData.append("name", "Response Safety Classification Dataset");
+  formData.append("name", datasetName);
   formData.append("pairs_to_generate", "50");
-  formData.append("pair_type", "qa");
   formData.append("temperature", "0.3");
-
-  template.rules.forEach((rule: string) => {
-    formData.append("rules[]", rule);
-  });
-
   formData.append("question_format", questionFormat);
   formData.append("answer_format", answerFormat);
+  formData.append("rules[]", rules as any);
 
-  // Add web URLs
-  WEB_URLS.forEach((url, index) => {
-    formData.append(`web_urls[${index}]`, url);
-  });
-
-  const res = await api("/api/v1/public/datasets/create-synthetic", "POST", {
-    body: formData,
-  });
-  return res.dataset_id;
-}
-
-async function createUserPromptSafetyDataset(projectId: string) {
-  console.log("   Creating user prompt safety dataset...");
-
-  const template = TEMPLATES.user_prompt_safety;
-  const questionFormat = template.question_format;
-  const answerFormat = template.answer_format;
-
-  const formData = new FormData();
-  formData.append("project_id", projectId);
-  formData.append("name", "User Prompt Safety Classification Dataset");
-  formData.append("pairs_to_generate", "50");
-  formData.append("pair_type", "qa");
-  formData.append("temperature", "0.3");
-
-  template.rules.forEach((rule: string) => {
-    formData.append("rules[]", rule);
-  });
-
-  formData.append("question_format", questionFormat);
-  formData.append("answer_format", answerFormat);
-
-  // Add web URLs
-  WEB_URLS.forEach((url, index) => {
-    formData.append(`web_urls[${index}]`, url);
+  // Add website URLs as array (indexed format like youtube_urls)
+  WEB_URLS.forEach((url: string, index: number) => {
+    formData.append(`website_urls[${index}]`, url);
   });
 
   const res = await api("/api/v1/public/datasets/create-synthetic", "POST", {
@@ -130,61 +101,50 @@ async function main() {
 
   // Create project
   console.log("1. Creating project...");
-  const res = await api("/api/v1/public/projects/create", "POST", {
+  const project = await api("/api/v1/public/projects/create", "POST", {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       name: "Safety Classification Project",
-      goal: "Generate safety classification datasets for content moderation",
+      goal: "Generate response safety classification dataset for content moderation",
     }),
   });
-  const projectId = res.project_id;
+  const projectId = project.project_id;
   console.log(`   ✓ Project: ${projectId}\n`);
 
   // Generate response safety dataset
   console.log("2. Generating response safety dataset...");
   console.log(`   URLs: ${WEB_URLS.length} web sources`);
-  const responseDatasetId = await createResponseSafetyDataset(projectId);
-  console.log(`   ✓ Dataset: ${responseDatasetId}`);
+  console.log(`   Using response_safety template with ${TEMPLATES.response_safety.rules.length} rules`);
+  const datasetId = await createSyntheticDataset(
+    projectId,
+    "Response Safety Classification Dataset",
+    "response_safety"
+  );
+  console.log(`   ✓ Dataset: ${datasetId}`);
   console.log("   Waiting for generation (may take 5-10 minutes)...");
-  const responseDataset = await waitForDataset(responseDatasetId);
-  console.log(`   ✓ Ready: ${responseDataset.datapoints_count} datapoints\n`);
+  const dataset = await waitForDataset(datasetId);
+  console.log(`   ✓ Ready: ${dataset.datapoints_count} datapoints\n`);
 
-  // Generate user prompt safety dataset
-  console.log("3. Generating user prompt safety dataset...");
-  console.log(`   URLs: ${WEB_URLS.length} web sources`);
-  const userDatasetId = await createUserPromptSafetyDataset(projectId);
-  console.log(`   ✓ Dataset: ${userDatasetId}`);
-  console.log("   Waiting for generation (may take 5-10 minutes)...");
-  const userDataset = await waitForDataset(userDatasetId);
-  console.log(`   ✓ Ready: ${userDataset.datapoints_count} datapoints\n`);
-
-  // Create snapshots
-  console.log("4. Creating snapshots...");
-  const responseSnapshot = await api("/api/v1/public/snapshots/create", "POST", {
+  // Create snapshot
+  console.log("3. Creating snapshot...");
+  const snapshot = await api("/api/v1/public/snapshots/create", "POST", {
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ dataset_id: responseDatasetId, split_percentage: 80 }),
+    body: JSON.stringify({ dataset_id: datasetId, split_percentage: 80 }),
   });
-  const responseSnapshotId = responseSnapshot.snapshot_id;
-  console.log(`   ✓ Response Safety Snapshot: ${responseSnapshotId}`);
-
-  const userSnapshot = await api("/api/v1/public/snapshots/create", "POST", {
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ dataset_id: userDatasetId, split_percentage: 80 }),
-  });
-  const userSnapshotId = userSnapshot.snapshot_id;
-  console.log(`   ✓ User Prompt Safety Snapshot: ${userSnapshotId}\n`);
+  const snapshotId = snapshot.snapshot_id;
+  console.log(`   ✓ Snapshot: ${snapshotId}\n`);
 
   // Generate recommendations
-  console.log("5. Generating recommendations...");
+  console.log("4. Generating recommendations...");
   await api("/api/v1/public/recommendations/generate", "POST", {
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ snapshot_id: responseSnapshotId }),
+    body: JSON.stringify({ snapshot_id: snapshotId }),
   });
 
   let recs;
   while (true) {
     await sleep(5000);
-    recs = await api(`/api/v1/public/recommendations/${responseSnapshotId}`);
+    recs = await api(`/api/v1/public/recommendations/${snapshotId}`);
     if (recs.status !== "processing") {
       break;
     }
@@ -201,7 +161,7 @@ async function main() {
   console.log();
 
   // Create fine-tuning job
-  console.log("6. Creating fine-tuning job...");
+  console.log("5. Creating fine-tuning job...");
   const experiments = recs.recommended_experiments
     .filter((e: any) => e.recommended)
     .map((exp: any) => {
@@ -217,7 +177,7 @@ async function main() {
   const res2 = await api("/api/v1/public/finetuning/create", "POST", {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      snapshot_id: responseSnapshotId,
+      snapshot_id: snapshotId,
       name: "Response Safety Model",
       experiments,
     }),
@@ -226,7 +186,7 @@ async function main() {
   console.log(`   ✓ Job: ${jobId}\n`);
 
   // Monitor (5 minutes max)
-  console.log("7. Monitoring job...");
+  console.log("6. Monitoring job...");
   for (let i = 0; i < 30; i++) {
     await sleep(10000);
     const job = await api(`/api/v1/public/finetuning/${jobId}`);
@@ -240,9 +200,8 @@ async function main() {
   }
 
   console.log("\n✓ Done!");
-  console.log(`\nGenerated datasets:`);
-  console.log(`  - Response Safety: ${responseDatasetId} (${responseDataset.datapoints_count} datapoints)`);
-  console.log(`  - User Prompt Safety: ${userDatasetId} (${userDataset.datapoints_count} datapoints)`);
+  console.log(`\nGenerated dataset:`);
+  console.log(`  - Response Safety: ${datasetId} (${dataset.datapoints_count} datapoints)`);
   console.log(`\nFine-tuning job: ${jobId}\n`);
 }
 
