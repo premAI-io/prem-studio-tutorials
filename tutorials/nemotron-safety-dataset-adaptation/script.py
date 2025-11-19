@@ -147,8 +147,7 @@ def main():
     dataset_name = "nvidia/Nemotron-Safety-Guard-Dataset-v3"
     split = "train"  # Can be "train", "validation", or "test"
     output_file = "converted_dataset.jsonl"
-    random_seed = 42  # Repeatable random seed
-    max_samples = 10000  # Only convert 10K samples
+    language_filter = "en"  # Only process English rows
     
     print(f"1. Loading dataset: {dataset_name} (split: {split})...")
     try:
@@ -164,11 +163,14 @@ def main():
         print("   Then modify the script to load from a local JSONL file.")
         sys.exit(1)
     
-    print(f"2. Shuffling dataset with seed {random_seed}...")
-    dataset = dataset.shuffle(seed=random_seed)
-    print(f"   ✓ Dataset shuffled\n")
+    print(f"2. Filtering dataset for language: {language_filter}...")
+    dataset = dataset.filter(lambda x: x.get("language") == language_filter)
+    if hasattr(dataset, '__len__'):
+        print(f"   ✓ Filtered to {len(dataset)} {language_filter} entries\n")  # type: ignore
+    else:
+        print(f"   ✓ Dataset filtered\n")
     
-    print(f"3. Converting {max_samples} entries to messages format...")
+    print(f"3. Converting entries to messages format...")
     converted_count = 0
     skipped_count = 0
     processed_count = 0
@@ -179,10 +181,6 @@ def main():
     
     with open(output_path, "w", encoding="utf-8") as outfile:
         for entry in dataset:
-            # Stop if we've converted enough samples
-            if converted_count >= max_samples:
-                break
-            
             processed_count += 1
             converted_entry = convert_entry(entry)
             
@@ -197,7 +195,7 @@ def main():
             
             # Progress indicator
             if converted_count % 1000 == 0:
-                print(f"   Converted {converted_count}/{max_samples} entries...")
+                print(f"   Converted {converted_count} entries...")
     
     print(f"   ✓ Converted {converted_count} entries")
     print(f"   ✓ Skipped {skipped_count} entries (REDACTED or empty)")
