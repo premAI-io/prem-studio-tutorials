@@ -7,6 +7,7 @@ with instruction and response_instruction templates.
 
 import json
 import os
+import random
 import sys
 from pathlib import Path
 
@@ -148,6 +149,8 @@ def main():
     split = "train"  # Can be "train", "validation", or "test"
     output_file = "converted_dataset.jsonl"
     language_filter = "en"  # Only process English rows
+    sample_size = 10000  # Number of random samples to take
+    random_seed = 42  # Reproducible seed for random sampling
     
     print(f"1. Loading dataset: {dataset_name} (split: {split})...")
     try:
@@ -170,7 +173,17 @@ def main():
     else:
         print(f"   ✓ Dataset filtered\n")
     
-    print(f"3. Converting entries to messages format...")
+    print(f"3. Converting entries to messages format (target: {sample_size})...")
+    # Set random seed for reproducibility
+    random.seed(random_seed)
+    
+    # Get dataset length
+    dataset_length = len(dataset)  # type: ignore
+    
+    # Shuffle all indices
+    all_indices = list(range(dataset_length))
+    random.shuffle(all_indices)
+    
     converted_count = 0
     skipped_count = 0
     processed_count = 0
@@ -179,8 +192,15 @@ def main():
     script_dir = Path(__file__).parent
     output_path = script_dir / output_file
     
+    print(f"   Processing entries until we have {sample_size} converted...")
+    
     with open(output_path, "w", encoding="utf-8") as outfile:
-        for entry in dataset:
+        for idx in all_indices:
+            # Stop if we've reached our target
+            if converted_count >= sample_size:
+                break
+                
+            entry = dataset[idx]  # type: ignore
             processed_count += 1
             converted_entry = convert_entry(entry)
             
@@ -198,7 +218,7 @@ def main():
                 print(f"   Converted {converted_count} entries...")
     
     print(f"   ✓ Converted {converted_count} entries")
-    print(f"   ✓ Skipped {skipped_count} entries (REDACTED or empty)")
+    print(f"   ✓ Processed {processed_count} total entries to get {converted_count} converted")
     print(f"   ✓ Output saved to: {output_path}\n")
     
     # Show sample entry
@@ -213,7 +233,6 @@ def main():
     print("\n✓ Conversion complete!")
     print(f"\nOutput file: {output_path}")
     print(f"Total entries: {converted_count}")
-    print(f"Skipped entries: {skipped_count}\n")
 
 
 if __name__ == "__main__":
