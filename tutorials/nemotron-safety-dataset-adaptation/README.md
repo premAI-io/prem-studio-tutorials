@@ -1,13 +1,5 @@
 # Adapt Nemotron Safety Guard Dataset to Messages Format
 
-**Tags:** `dataset`, `conversion` | `intermediate` | `safety`
-
-## Prerequisites
-
-- Python 3.8+ installed
-- Basic understanding of JSONL format and dataset conversion
-- Access to download the Nemotron Safety Guard Dataset v3 from Hugging Face
-
 ## Setup Environment
 
 ```bash
@@ -148,15 +140,9 @@ source venv/bin/activate  # On macOS/Linux
 python script.py
 ```
 
-## Resources
 
-- [sample_output.jsonl](resources/sample_output.jsonl) - Example of the converted format
-- [Nemotron Safety Guard Dataset v3](https://huggingface.co/datasets/nvidia/Nemotron-Safety-Guard-Dataset-v3) - Source dataset
 
-## Next Steps
+[Nemotron Safety Guard Dataset v3](https://huggingface.co/datasets/nvidia/Nemotron-Safety-Guard-Dataset-v3) - Source dataset
 
-- Use the converted dataset to fine-tune a safety guard model
-- Evaluate the model's performance on safety classification tasks
-- Explore filtering by language or safety categories
-- Create train/validation/test splits from the converted dataset
+
 
