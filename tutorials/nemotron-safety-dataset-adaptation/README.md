@@ -4,13 +4,11 @@
 
 ## Prerequisites
 
-- Python 3.8+ or Node.js 18+ installed
+- Python 3.8+ installed
 - Basic understanding of JSONL format and dataset conversion
 - Access to download the Nemotron Safety Guard Dataset v3 from Hugging Face
 
 ## Setup Environment
-
-### Python
 
 ```bash
 # Create a virtual environment
@@ -24,16 +22,6 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
-```
-
-### TypeScript
-
-```bash
-# Install dependencies using npm
-npm install
-
-# Or using bun (if available)
-bun install
 ```
 
 ## Outcome
@@ -147,31 +135,9 @@ Where:
   - `Response Safety`: "safe" or "unsafe" (optional, only if response exists, from `response_label`)
   - `Safety Categories`: comma-separated list (optional, only if unsafe, from `violated_categories`)
 
-## Code Snippets
-
-### TypeScript
-
-See `script.ts` for complete implementation.
-
-**To run the TypeScript script:**
-
-```bash
-# Download the dataset first (see script for details)
-# Then run the script using bun (recommended)
-bun script.ts
-
-# Or using Node.js with ts-node
-npx ts-node script.ts
-
-# Or using Node.js with tsx
-npx tsx script.ts
-```
-
-### Python
+## Running the Script
 
 See `script.py` for complete implementation.
-
-**To run the Python script:**
 
 ```bash
 # Make sure your virtual environment is activated
