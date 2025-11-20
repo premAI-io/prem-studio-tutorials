@@ -19,10 +19,8 @@
   "author": "Prem AI",
   "license": "MIT",
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.0",

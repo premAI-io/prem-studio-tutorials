@@ -17,6 +17,9 @@
 ### Python
 
 ```bash
+# Navigate to the Python directory from the repository root
+cd tutorials/pdf-synthetic-dataset/python
+
 # Create a virtual environment
 python -m venv venv
 
@@ -33,10 +36,10 @@ pip install -r requirements.txt
 ### TypeScript
 
 ```bash
-# Install dependencies using npm
-npm install
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/pdf-synthetic-dataset/typescript
 
-# Or using bun (if available)
+# Install dependencies using bun
 bun install
 ```
 
@@ -97,13 +100,11 @@ See `typescript/script.ts` for the complete implementation.
 # Export your API key
 export API_KEY=your-api-key-here
 
-# Navigate to the typescript directory
-cd typescript
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/pdf-synthetic-dataset/typescript
 
 # Run the script
-npm start
-# or
-bun run script.ts
+bun script.ts
 ```
 
 ### Python
@@ -116,8 +117,8 @@ See `python/script.py` for the complete implementation.
 # Export your API key
 export API_KEY=your-api-key-here
 
-# Navigate to the python directory
-cd python
+# Navigate to the Python directory from the repository root
+cd tutorials/pdf-synthetic-dataset/python
 
 # Make sure your virtual environment is activated
 source venv/bin/activate
