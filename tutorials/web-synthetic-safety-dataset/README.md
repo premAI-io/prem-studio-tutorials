@@ -16,6 +16,9 @@
 ### Python
 
 ```bash
+# Navigate to the Python directory from the repository root
+cd tutorials/web-synthetic-safety-dataset/python
+
 # Create a virtual environment
 python -m venv venv
 
@@ -32,10 +35,10 @@ pip install requests
 ### TypeScript
 
 ```bash
-# Install dependencies using npm
-npm install
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/web-synthetic-safety-dataset/typescript
 
-# Or using bun (if available)
+# Install dependencies using bun
 bun install
 ```
 
@@ -105,14 +108,11 @@ See `script.ts` for complete implementation with both response and user prompt c
 # Export your API key
 export API_KEY=your-api-key-here
 
-# Run the script using bun (recommended)
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/web-synthetic-safety-dataset/typescript
+
+# Run the script using bun
 bun script.ts
-
-# Or using Node.js with ts-node
-npx ts-node script.ts
-
-# Or using Node.js with tsx
-npx tsx script.ts
 ```
 
 ### Python
@@ -124,6 +124,9 @@ See `script.py` for complete implementation with both response and user prompt c
 ```bash
 # Export your API key
 export API_KEY=your-api-key-here
+
+# Navigate to the Python directory from the repository root
+cd tutorials/web-synthetic-safety-dataset/python
 
 # Make sure your virtual environment is activated
 source venv/bin/activate  # On macOS/Linux

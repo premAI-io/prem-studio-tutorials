@@ -16,8 +16,8 @@
 ### Python
 
 ```bash
-# Navigate to the Python directory
-cd python
+# Navigate to the Python directory from the repository root
+cd tutorials/guarding-byoe/python
 
 # Create a virtual environment
 python -m venv venv
@@ -35,14 +35,11 @@ pip install -r requirements.txt
 ### TypeScript
 
 ```bash
-# Navigate to the TypeScript directory
-cd typescript
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/guarding-byoe/typescript
 
 # Install dependencies using bun
 bun install
-
-# Or using npm
-npm install
 ```
 
 ## Outcome
@@ -108,7 +105,7 @@ You can run the server locally to test the logic before deploying.
 
 **TypeScript (Bun + Elysia):**
 ```bash
-cd typescript
+cd tutorials/guarding-byoe/typescript
 # Set API_TOKEN
 export API_TOKEN=your-secret-token
 # Run server
@@ -117,7 +114,7 @@ bun run dev
 
 **Python (FastAPI):**
 ```bash
-cd python
+cd tutorials/guarding-byoe/python
 # Set API_TOKEN
 export API_TOKEN=your-secret-token
 # Run server

@@ -17,6 +17,9 @@
 If the tutorial includes a `requirements.txt` file:
 
 ```bash
+# Navigate to the Python directory from the repository root
+cd tutorials/[tutorial-folder]/python
+
 # Create a virtual environment
 python -m venv venv
 
@@ -40,10 +43,10 @@ pip install requests
 If the tutorial includes a `package.json` file:
 
 ```bash
-# Install dependencies using npm
-npm install
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/[tutorial-folder]/typescript
 
-# Or using bun (if available)
+# Install dependencies using bun
 bun install
 ```
 
@@ -86,14 +89,11 @@ See `script.ts` for complete implementation.
 # Export your API key
 export API_KEY=your-api-key-here
 
-# Run the script using bun (recommended)
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/[tutorial-folder]/typescript
+
+# Run the script using bun
 bun script.ts
-
-# Or using Node.js with ts-node
-npx ts-node script.ts
-
-# Or using Node.js with tsx
-npx tsx script.ts
 ```
 
 ### Python
@@ -105,6 +105,9 @@ See `script.py` for complete implementation.
 ```bash
 # Export your API key
 export API_KEY=your-api-key-here
+
+# Navigate to the Python directory from the repository root
+cd tutorials/[tutorial-folder]/python
 
 # Make sure your virtual environment is activated
 source venv/bin/activate  # On macOS/Linux

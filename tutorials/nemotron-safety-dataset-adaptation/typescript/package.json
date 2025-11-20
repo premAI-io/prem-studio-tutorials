@@ -2,10 +2,11 @@
   "name": "nemotron-safety-dataset-adaptation",
   "version": "1.0.0",
   "description": "Convert Nemotron Safety Guard Dataset to messages format",
+  "type": "module",
   "main": "script.ts",
   "scripts": {
-    "start": "tsx script.ts",
-    "build": "tsc script.ts"
+    "start": "bun script.ts",
+    "build": "bun build script.ts --outdir dist"
   },
   "keywords": [
     "dataset",
@@ -15,9 +16,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "tsx": "^4.0.0"
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
   }
 }
-

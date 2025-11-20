@@ -5,17 +5,6 @@
 - **Complexity**: `advanced`
 - **Domain**: `safety`
 
-## Overview
-
-Continuously improve your model's performance by establishing a feedback loop:
-1.  **Test** the fine-tuned model with domain-specific prompts
-2.  **Evaluate** responses using a judge model (Claude 4.5 Sonnet)
-3.  **Trace** the interactions, capturing inputs, outputs, scores, and feedback
-4.  **Augment** your dataset with these traces (improving weak responses automatically)
-5.  **Retrain** the model on the improved dataset
-
-This tutorial builds directly upon the [Web Synthetic Safety Dataset](../web-synthetic-safety-dataset/README.md) tutorial. It assumes you have a safety guard model that you want to improve.
-
 ## Prerequisites
 
 - **Completed** the [Web Synthetic Safety Dataset](../web-synthetic-safety-dataset/README.md) tutorial
@@ -29,6 +18,9 @@ This tutorial builds directly upon the [Web Synthetic Safety Dataset](../web-syn
 ### Python
 
 ```bash
+# Navigate to the Python directory from the repository root
+cd tutorials/continuous-finetuning/python
+
 # Create a virtual environment
 python -m venv venv
 
@@ -45,10 +37,10 @@ pip install -r requirements.txt
 ### TypeScript
 
 ```bash
-# Install dependencies using npm
-npm install
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/continuous-finetuning/typescript
 
-# Or using bun (if available)
+# Install dependencies using bun
 bun install
 ```
 
@@ -66,30 +58,43 @@ By the end of this tutorial, you will:
 
 You need the **Project ID** and the **Model Alias** (or ID) of your fine-tuned model. You can find these in the Prem Studio dashboard.
 
-### Step 2: Run the Continuous Fine-Tuning Script
+### Step 2: Generate Responses
 
-The script performs the full cycle: generation -> evaluation -> tracing -> dataset update -> retraining.
+Generate responses from your fine-tuned model using test prompts matching your domain.
 
-**TypeScript:**
-```bash
-# Replace placeholders with your actual values
-bun run script.ts --project-id <YOUR_PROJECT_ID> --model-alias <YOUR_MODEL_ALIAS>
-```
+**API Endpoint:** [`POST /api/v1/chat/completions`](https://docs.premai.io/api-reference/chat-completions/post-chatcompletions)
 
-**Python:**
-```bash
-# Replace placeholders with your actual values
-python script.py --project-id <YOUR_PROJECT_ID> --model-alias <YOUR_MODEL_ALIAS>
-```
+### Step 3: Evaluate Responses
 
-### Step 3: Script Logic Explained
+Use a judge model (Claude 4.5 Sonnet) to score the safety classification (0-1) and provide feedback.
 
-1.  **Generate Responses**: The script sends test prompts (from `resources/test_examples.json`) to your model. These prompts follow the exact format defined in the safety dataset tutorial.
-2.  **Evaluate with Judge**: It asks a judge model (Claude 4.5 Sonnet) to score the safety classification (0-1) and provide feedback.
-3.  **Create Traces**: It logs the interaction as a "Trace" in Prem Studio, attaching the score and feedback.
-4.  **Add to Dataset**: It adds these traces to your original dataset. Prem Studio handles the logic: high-quality traces are added as-is; low-quality traces are corrected before addition.
-5.  **Create Snapshot**: A new snapshot of the augmented dataset is created.
-6.  **Retrain**: A new fine-tuning job is launched using the new snapshot.
+**API Endpoint:** [`POST /api/v1/chat/completions`](https://docs.premai.io/api-reference/chat-completions/post-chatcompletions)
+
+### Step 4: Create Traces
+
+Log the interaction as a "Trace" in Prem Studio, attaching the score and feedback.
+
+**API Endpoint:** [`POST /api/v1/traces`](https://docs.premai.io/api-reference/traces/post-traces)
+
+### Step 5: Add Traces to Dataset
+
+Add these traces to your original dataset. Prem Studio handles the logic: high-quality traces are added as-is; low-quality traces are corrected before addition.
+
+**API Endpoint:** [`POST /api/v1/traces/{trace_id}/addToDataset`](https://docs.premai.io/api-reference/traces/post-traces-trace-id-addtodataset)
+
+### Step 6: Create Snapshot
+
+Create a new snapshot of the augmented dataset.
+
+**API Endpoint:** [`POST /api/v1/public/snapshots/create`](https://docs.premai.io/api-reference/snapshots/post-snapshots-create)
+
+### Step 7: Get Recommendations & Fine-tune
+
+Analyze the new snapshot and launch a fine-tuning job.
+
+**API Endpoints:**
+- [`POST /api/v1/public/recommendations/generate`](https://docs.premai.io/api-reference/recommendations/post-recommendations-generate)
+- [`POST /api/v1/public/finetuning/create`](https://docs.premai.io/api-reference/finetuning/post-finetuning-create)
 
 ## Code Snippets
 
@@ -97,9 +102,29 @@ python script.py --project-id <YOUR_PROJECT_ID> --model-alias <YOUR_MODEL_ALIAS>
 
 See `typescript/script.ts` for the complete implementation.
 
+**To run the TypeScript script:**
+
+```bash
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/continuous-finetuning/typescript
+
+# Replace placeholders with your actual values
+bun script.ts --project-id <YOUR_PROJECT_ID> --model-alias <YOUR_MODEL_ALIAS>
+```
+
 ### Python
 
 See `python/script.py` for the complete implementation.
+
+**To run the Python script:**
+
+```bash
+# Navigate to the Python directory from the repository root
+cd tutorials/continuous-finetuning/python
+
+# Replace placeholders with your actual values
+python script.py --project-id <YOUR_PROJECT_ID> --model-alias <YOUR_MODEL_ALIAS>
+```
 
 ## Resources
 

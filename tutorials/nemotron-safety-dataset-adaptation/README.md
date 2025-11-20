@@ -7,7 +7,12 @@
 
 ## Setup Environment
 
+### Python
+
 ```bash
+# Navigate to the Python directory from the repository root
+cd tutorials/nemotron-safety-dataset-adaptation/python
+
 # Create a virtual environment
 python -m venv venv
 
@@ -19,6 +24,16 @@ source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+```
+
+### TypeScript
+
+```bash
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/nemotron-safety-dataset-adaptation/typescript
+
+# Install dependencies using bun
+bun install
 ```
 
 ## Outcome
@@ -134,9 +149,26 @@ Where:
 
 ## Running the Script
 
-See `script.py` for complete implementation.
+### TypeScript
+
+See `typescript/script.ts` for complete implementation.
 
 ```bash
+# Navigate to the TypeScript directory from the repository root
+cd tutorials/nemotron-safety-dataset-adaptation/typescript
+
+# Run the script
+bun script.ts
+```
+
+### Python
+
+See `python/script.py` for complete implementation.
+
+```bash
+# Navigate to the Python directory from the repository root
+cd tutorials/nemotron-safety-dataset-adaptation/python
+
 # Make sure your virtual environment is activated
 source venv/bin/activate  # On macOS/Linux
 # venv\Scripts\activate   # On Windows
