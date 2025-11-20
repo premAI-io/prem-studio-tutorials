@@ -1,6 +1,9 @@
 # Generate Safety Classification Dataset from Web Sources
 
-**Tags:** `dataset`, `finetuning` | `intermediate` | `safety`
+**Tags:**
+- **Platform Sections**: `dataset`, `finetuning`
+- **Complexity**: `intermediate`
+- **Domain**: `safety`
 
 ## Prerequisites
 

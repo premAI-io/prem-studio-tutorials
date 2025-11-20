@@ -1,6 +1,9 @@
 # [Tutorial Title]
 
-**Tags:** `[platform-section]` | `[complexity]` | `[domain]`
+**Tags:**
+- **Platform Sections**: `[platform-section]`
+- **Complexity**: `[complexity]`
+- **Domain**: `[domain]`
 
 ## Prerequisites
 

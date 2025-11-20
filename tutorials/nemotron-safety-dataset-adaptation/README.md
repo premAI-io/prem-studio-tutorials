@@ -1,5 +1,10 @@
 # Adapt Nemotron Safety Guard Dataset to Messages Format
 
+**Tags:**
+- **Platform Sections**: `dataset`
+- **Complexity**: `intermediate`
+- **Domain**: `safety`
+
 ## Setup Environment
 
 ```bash
