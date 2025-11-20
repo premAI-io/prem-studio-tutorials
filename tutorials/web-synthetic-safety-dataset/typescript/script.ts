@@ -13,7 +13,7 @@ const BASE_URL = "https://studio.premai.io";
 const API_KEY = process.env.API_KEY;
 
 // Load templates from JSON file
-const TEMPLATES_PATH = path.join(__dirname, "resources", "qa_templates.json");
+const TEMPLATES_PATH = path.join(__dirname, "..", "resources", "qa_templates.json");
 const TEMPLATES = JSON.parse(fs.readFileSync(TEMPLATES_PATH, "utf-8"));
 
 // Define web sources (10 pages from Anthropic HH-RLHF dataset)

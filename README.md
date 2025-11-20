@@ -10,14 +10,20 @@ Each tutorial is organized in its own directory under `/tutorials/`, following t
 /tutorials/
     /<tutorial-name>/
         README.md          # Tutorial documentation
-        script.py          # Python implementation
-        script.ts          # TypeScript implementation
-        notebook.ipynb     # Jupyter notebook
-        resources/         # Supporting files
+        python/            # Python implementation
+            script.py
+            requirements.txt
+            notebook.ipynb
+        typescript/        # TypeScript implementation
+            script.ts
+            package.json
+        resources/         # Shared resources
             dataset.jsonl  # Optional: sample dataset in JSONL format
-            qa_templates.json  # Optional: QA templates for synthetic dataset generation
+            qa_templates.json
             ...
 ```
+
+Note: Not all tutorials provide both Python and TypeScript implementations.
 
 ## Tutorial Format
 
@@ -46,7 +52,7 @@ Tags appear at the top of each tutorial README.
 We welcome contributions! To add a new tutorial:
 
 1. **Copy the template**: Use `/tutorials/_template/` as a starting point
-2. **Follow the structure**: Ensure all required files are included
+2. **Follow the structure**: Ensure all required files are included in the appropriate `python` or `typescript` subfolders
 3. **Add tags**: Include platform sections, complexity, and domain tags
 4. **Submit a PR**: Open a pull request with your tutorial
 

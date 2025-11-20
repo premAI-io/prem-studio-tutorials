@@ -17,7 +17,7 @@ API_KEY = os.getenv("API_KEY")
 
 # Load templates from JSON file
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATES_PATH = os.path.join(SCRIPT_DIR, "resources", "qa_templates.json")
+TEMPLATES_PATH = os.path.join(SCRIPT_DIR, "..", "resources", "qa_templates.json")
 
 with open(TEMPLATES_PATH, "r") as f:
     TEMPLATES = json.load(f)
