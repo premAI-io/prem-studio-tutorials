@@ -1,0 +1,14 @@
+{
+  "name": "tutorial-template",
+  "version": "1.0.0",
+  "description": "Tutorial TypeScript implementation",
+  "scripts": {
+    "start": "ts-node script.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "@types/node": "^20.8.2"
+  }
+}

@@ -7,7 +7,6 @@ with instruction and response_instruction templates.
 
 import json
 import os
-import random
 import sys
 from pathlib import Path
 
@@ -148,17 +147,11 @@ def main():
     dataset_name = "nvidia/Nemotron-Safety-Guard-Dataset-v3"
     split = "train"  # Can be "train", "validation", or "test"
     output_file = "converted_dataset.jsonl"
-    language_filter = "en"  # Only process English rows
-    sample_size = 10000  # Number of random samples to take
-    random_seed = 42  # Reproducible seed for random sampling
     
     print(f"1. Loading dataset: {dataset_name} (split: {split})...")
     try:
         dataset = load_dataset(dataset_name, split=split)
-        if hasattr(dataset, '__len__'):
-            print(f"   ✓ Loaded {len(dataset)} entries\n")  # type: ignore
-        else:
-            print(f"   ✓ Dataset loaded\n")
+        print(f"   ✓ Loaded {len(dataset)} entries\n")
     except Exception as e:
         print(f"   ✗ Error loading dataset: {e}")
         print("\n   Alternative: Download the dataset manually from Hugging Face")
@@ -166,42 +159,16 @@ def main():
         print("   Then modify the script to load from a local JSONL file.")
         sys.exit(1)
     
-    print(f"2. Filtering dataset for language: {language_filter}...")
-    dataset = dataset.filter(lambda x: x.get("language") == language_filter)
-    if hasattr(dataset, '__len__'):
-        print(f"   ✓ Filtered to {len(dataset)} {language_filter} entries\n")  # type: ignore
-    else:
-        print(f"   ✓ Dataset filtered\n")
-    
-    print(f"3. Converting entries to messages format (target: {sample_size})...")
-    # Set random seed for reproducibility
-    random.seed(random_seed)
-    
-    # Get dataset length
-    dataset_length = len(dataset)  # type: ignore
-    
-    # Shuffle all indices
-    all_indices = list(range(dataset_length))
-    random.shuffle(all_indices)
-    
+    print(f"2. Converting entries to messages format...")
     converted_count = 0
     skipped_count = 0
-    processed_count = 0
     
     # Open output file for writing
     script_dir = Path(__file__).parent
     output_path = script_dir / output_file
     
-    print(f"   Processing entries until we have {sample_size} converted...")
-    
     with open(output_path, "w", encoding="utf-8") as outfile:
-        for idx in all_indices:
-            # Stop if we've reached our target
-            if converted_count >= sample_size:
-                break
-                
-            entry = dataset[idx]  # type: ignore
-            processed_count += 1
+        for entry in dataset:
             converted_entry = convert_entry(entry)
             
             if converted_entry is None:
@@ -214,15 +181,15 @@ def main():
             converted_count += 1
             
             # Progress indicator
-            if converted_count % 1000 == 0:
-                print(f"   Converted {converted_count} entries...")
+            if converted_count % 10000 == 0:
+                print(f"   Processed {converted_count} entries...")
     
     print(f"   ✓ Converted {converted_count} entries")
-    print(f"   ✓ Processed {processed_count} total entries to get {converted_count} converted")
+    print(f"   ✓ Skipped {skipped_count} entries (REDACTED or empty)")
     print(f"   ✓ Output saved to: {output_path}\n")
     
     # Show sample entry
-    print("4. Sample converted entry:")
+    print("3. Sample converted entry:")
     with open(output_path, "r", encoding="utf-8") as infile:
         first_line = infile.readline()
         if first_line:
@@ -233,6 +200,7 @@ def main():
     print("\n✓ Conversion complete!")
     print(f"\nOutput file: {output_path}")
     print(f"Total entries: {converted_count}")
+    print(f"Skipped entries: {skipped_count}\n")
 
 
 if __name__ == "__main__":
