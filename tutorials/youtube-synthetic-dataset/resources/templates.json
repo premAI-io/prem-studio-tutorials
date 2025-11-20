@@ -1,0 +1,16 @@
+{
+  "financial_analysis": {
+    "question_format": "Extract investment information from the following video transcript:\n\n{VIDEO_TRANSCRIPT}\n\nProvide the output in this JSON format:\n{\n  \"stocks_mentioned\": [\"TICKER1\", \"TICKER2\"],\n  \"investment_tips\": [\"tip 1\", \"tip 2\", \"tip 3\"],\n  \"risks_mentioned\": [\"risk 1\", \"risk 2\"],\n  \"video_topic\": \"brief description of main topic\"\n}",
+    "answer_format": "{\n  \"stocks_mentioned\": [\"<TICKER_SYMBOL_1>\", \"<TICKER_SYMBOL_2>\"],\n  \"investment_tips\": [\"<specific_tip_1>\", \"<specific_tip_2>\", \"<specific_tip_3>\"],\n  \"risks_mentioned\": [\"<risk_or_warning_1>\", \"<risk_or_warning_2>\"],\n  \"video_topic\": \"<main_topic_of_video>\"\n}",
+    "rules": [
+      "stocks_mentioned: List all stock ticker symbols mentioned (e.g., AAPL, TSLA, NVDA)",
+      "investment_tips: Extract 3-5 specific, actionable pieces of advice from the video",
+      "risks_mentioned: List any warnings, risks, or cautionary statements discussed",
+      "video_topic: Write a short phrase describing the main topic of the video",
+      "Only output valid JSON with no additional text before or after",
+      "If a field has no relevant information, use an empty array [] or empty string \"\"",
+      "Use exact quotes or close paraphrases from the video content",
+      "Do not invent or infer information not explicitly stated"
+    ]
+  }
+}
