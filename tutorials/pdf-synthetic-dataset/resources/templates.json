@@ -1,0 +1,15 @@
+{
+  "invoice_extraction": {
+    "question_format": "{EXTRACTED_TEXT}\n\nTask: Extract all the information available in the text and present it in the JSON format below.\nDo not infer or invent details — only include what is explicitly stated.\n\nJSON Schema:\n{\n  \"DateTime\": \"YYYY-MM-DD HH:MM:SS\",\n  \"Total Amount\": \"number\",\n  \"Currency\": \"string\",\n  \"Business Name\": \"string\",\n  \"Business Location\": \"string\"\n}",
+    "answer_format": "{\n  \"DateTime\": \"<transaction_datetime_if_present>\",\n  \"Total Amount\": \"<total_amount_if_present>\",\n  \"Currency\": \"<currency_code_if_present>\",\n  \"Business Name\": \"<business_name_if_present>\",\n  \"Business Location\": \"<city_state_country_if_present>\"\n}",
+    "rules": [
+      "Always include the full extracted text in the question",
+      "Clearly instruct extraction into the given JSON schema",
+      "Only output the JSON object (no extra text)",
+      "Fill fields only if explicitly present in the text",
+      "If a field is missing, leave it empty but keep the key",
+      "Strictly follow the schema",
+      "Never infer, guess, or fabricate information"
+    ]
+  }
+}
