@@ -1,6 +1,9 @@
 # Continuous Fine-tuning Tutorial
 
-**Tags:** `finetuning` | `advanced` | `mlops`
+**Tags:**
+- **Platform Sections**: `finetuning`
+- **Complexity**: `advanced`
+- **Domain**: `mlops`
 
 ## Overview
 

@@ -1,6 +1,9 @@
 # Bring Your Own Eval: Safety Guardrail Evaluation
 
-**Tags:** `evaluation` `safety` `advanced` `guardrails`
+**Tags:**
+- **Platform Sections**: `evaluation`
+- **Complexity**: `advanced`
+- **Domain**: `safety`
 
 ## Prerequisites
 
