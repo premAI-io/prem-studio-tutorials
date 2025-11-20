@@ -7,6 +7,7 @@ Create synthetic Q&A pairs for extracting structured data from invoice PDFs.
 import os
 import json
 import time
+import glob
 import requests
 
 # Base URL for Prem Studio API
@@ -16,14 +17,15 @@ API_KEY = os.getenv("API_KEY")
 
 # Load templates from JSON file
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATES_PATH = os.path.join(SCRIPT_DIR, "..", "resources", "templates.json")
+RESOURCES_DIR = os.path.join(SCRIPT_DIR, "..", "resources")
+TEMPLATES_PATH = os.path.join(RESOURCES_DIR, "templates.json")
 
 with open(TEMPLATES_PATH, "r") as f:
     TEMPLATES = json.load(f)
 
-# Define invoice PDF files to process (place these in the same directory or update paths)
-# For this tutorial, we assume these files exist. You should replace them with actual PDF paths.
-PDF_FILES = ["invoice_1.pdf", "invoice_2.pdf", "invoice_3.pdf"]
+# Define invoice PDF files to process from resources directory
+# Find all PDF files in the resources directory
+PDF_FILES = sorted(glob.glob(os.path.join(RESOURCES_DIR, "*.pdf")))
 
 if not API_KEY:
     print("Error: API_KEY environment variable is required")
@@ -62,14 +64,17 @@ def create_synthetic_dataset(project_id: str, dataset_name: str, template_key: s
             print(f"   Warning: File {file_path} not found. Skipping.")
 
     if not files:
-        print("   Error: No PDF files found. Please place invoice PDF files in the current directory.")
+        print(f"   Error: No PDF files found in {RESOURCES_DIR}.")
         return None
+    
+    print(f"   Found {len(files)} PDF files.")
 
     # Prepare form data
+    # We set pairs_to_generate equal to the number of files to ensure 1 pair per file on average/total
     data = {
         "project_id": project_id,
         "name": dataset_name,
-        "pairs_to_generate": "1",
+        "pairs_to_generate": str(len(files)),
         "pair_type": "qa",
         "temperature": "0",
         "question_format": question_format,
@@ -120,7 +125,7 @@ def main():
 
     # Generate synthetic dataset
     print("2. Generating synthetic dataset from PDFs...")
-    print(f"   Files: {', '.join(PDF_FILES)}")
+    print(f"   Source: {RESOURCES_DIR}")
     
     dataset_id = create_synthetic_dataset(
         project_id,
@@ -216,4 +221,3 @@ if __name__ == "__main__":
     except Exception as err:
         print(f"\n✗ Error: {err}")
         exit(1)
-
