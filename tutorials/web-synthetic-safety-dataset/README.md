@@ -139,8 +139,7 @@ python script.py
 
 ## Next Steps
 
-- Fine-tune your model using the generated datasets
+- [Continuous Fine-Tuning](../continuous-finetuning/README.md) - Automatically improve your model using traces and feedback
 - Evaluate your model's performance on safety classification tasks
 - Deploy your safety classifier for production use
 - Explore other safety categories and expand your dataset
-

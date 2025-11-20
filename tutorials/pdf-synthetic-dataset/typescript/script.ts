@@ -12,11 +12,22 @@ const BASE_URL = "https://studio.premai.io";
 const API_KEY = process.env.API_KEY;
 
 // Load templates from JSON file
-const TEMPLATES_PATH = path.join(__dirname, "..", "resources", "templates.json");
+const RESOURCES_DIR = path.join(__dirname, "..", "resources");
+const TEMPLATES_PATH = path.join(RESOURCES_DIR, "templates.json");
 const TEMPLATES = JSON.parse(fs.readFileSync(TEMPLATES_PATH, "utf-8"));
 
-// Define invoice PDF files to process
-const PDF_FILES = ["invoice_1.pdf", "invoice_2.pdf", "invoice_3.pdf"];
+// Define invoice PDF files to process from resources directory
+// We'll scan the directory for .pdf files
+let PDF_FILES: string[] = [];
+try {
+  if (fs.existsSync(RESOURCES_DIR)) {
+    PDF_FILES = fs.readdirSync(RESOURCES_DIR)
+      .filter(file => file.toLowerCase().endsWith('.pdf'))
+      .map(file => path.join(RESOURCES_DIR, file));
+  }
+} catch (e) {
+  console.error(`Error reading resources directory: ${e}`);
+}
 
 if (!API_KEY) {
   console.error("Error: API_KEY environment variable is required");
@@ -58,10 +69,19 @@ async function createSyntheticDataset(
   const answerFormat = template.answer_format;
   const rules = template.rules;
 
+  // Check if we have files
+  if (PDF_FILES.length === 0) {
+    console.error(`   Error: No PDF files found in ${RESOURCES_DIR}.`);
+    return null;
+  }
+  
+  console.log(`   Found ${PDF_FILES.length} PDF files.`);
+
   const formData = new FormData();
   formData.append("project_id", projectId);
   formData.append("name", datasetName);
-  formData.append("pairs_to_generate", "1");
+  // Set pairs_to_generate to the number of files to ensure 1 pair per file
+  formData.append("pairs_to_generate", PDF_FILES.length.toString());
   formData.append("pair_type", "qa");
   formData.append("temperature", "0");
   formData.append("question_format", questionFormat);
@@ -75,16 +95,12 @@ async function createSyntheticDataset(
   // Upload PDF files
   let filesFound = false;
   PDF_FILES.forEach((pdfPath: string) => {
-    // In a real browser environment, you'd use File object. 
     // In Node with Bun/fetch, we need to construct a Blob/File.
-    // Note: This example assumes running with Bun which supports file() or reading to Blob.
-    // For standard Node.js fetch, you might need 'form-data' package or similar.
-    
     try {
       if (fs.existsSync(pdfPath)) {
         const fileContent = fs.readFileSync(pdfPath);
         const blob = new Blob([fileContent], { type: 'application/pdf' });
-        formData.append('files[]', blob, pdfPath);
+        formData.append('files[]', blob, path.basename(pdfPath));
         filesFound = true;
       } else {
         console.log(`   Warning: File ${pdfPath} not found. Skipping.`);
@@ -137,7 +153,7 @@ async function main() {
 
   // Generate synthetic dataset
   console.log("2. Generating synthetic dataset from PDFs...");
-  console.log(`   Files: ${PDF_FILES.join(", ")}`);
+  console.log(`   Source: ${RESOURCES_DIR}`);
   
   const datasetId = await createSyntheticDataset(
     projectId,
@@ -237,4 +253,3 @@ main().catch((err) => {
   console.error("\n✗ Error:", err.message);
   process.exit(1);
 });
-
