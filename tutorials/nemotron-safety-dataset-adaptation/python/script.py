@@ -8,6 +8,7 @@ with instruction and response_instruction templates.
 import json
 import os
 import sys
+import argparse
 from pathlib import Path
 
 # Try to import datasets library, provide helpful error if not available
@@ -99,16 +100,23 @@ def build_assistant_response(entry):
     return json.dumps(response_dict, ensure_ascii=False)
 
 
-def convert_entry(entry):
+def convert_entry(entry, target_language=None):
     """
     Convert a single dataset entry to the messages format.
     
     Args:
         entry: Dictionary containing dataset entry fields
+        target_language: Optional language code to filter by (e.g. "en")
         
     Returns:
         Dictionary in the messages format, or None if entry should be skipped
     """
+    # Filter by language if specified
+    if target_language:
+        entry_lang = entry.get("language", "")
+        if entry_lang != target_language:
+            return None
+
     # Skip REDACTED prompts (require external dataset reconstruction)
     if entry.get("prompt") == "REDACTED":
         return None
@@ -141,12 +149,18 @@ def convert_entry(entry):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Adapt Nemotron Safety Guard Dataset to Messages Format")
+    parser.add_argument("--language", type=str, default="en", help="Filter by language code (default: 'en')")
+    parser.add_argument("--limit", type=int, default=10000, help="Limit number of converted entries (default: 10000)")
+    parser.add_argument("--output", type=str, default="converted_dataset.jsonl", help="Output filename")
+    args = parser.parse_args()
+
     print("\n=== Adapt Nemotron Safety Guard Dataset to Messages Format ===\n")
     
     # Configuration
     dataset_name = "nvidia/Nemotron-Safety-Guard-Dataset-v3"
     split = "train"  # Can be "train", "validation", or "test"
-    output_file = "converted_dataset.jsonl"
+    output_file = args.output
     
     print(f"1. Loading dataset: {dataset_name} (split: {split})...")
     try:
@@ -160,6 +174,11 @@ def main():
         sys.exit(1)
     
     print(f"2. Converting entries to messages format...")
+    if args.language:
+        print(f"   Filter: Language = {args.language}")
+    if args.limit:
+        print(f"   Limit: {args.limit} entries")
+
     converted_count = 0
     skipped_count = 0
     
@@ -169,7 +188,11 @@ def main():
     
     with open(output_path, "w", encoding="utf-8") as outfile:
         for entry in dataset:
-            converted_entry = convert_entry(entry)
+            # Check limit
+            if args.limit and converted_count >= args.limit:
+                break
+
+            converted_entry = convert_entry(entry, target_language=args.language)
             
             if converted_entry is None:
                 skipped_count += 1
@@ -181,7 +204,7 @@ def main():
             converted_count += 1
             
             # Progress indicator
-            if converted_count % 10000 == 0:
+            if converted_count % 1000 == 0:
                 print(f"   Processed {converted_count} entries...")
     
     print(f"   ✓ Converted {converted_count} entries")
