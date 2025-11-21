@@ -112,11 +112,16 @@ interface ConvertedEntry {
   messages: Array<{ role: string; content: string }>;
 }
 
-function convertEntry(entry: DatasetEntry): ConvertedEntry | null {
+function convertEntry(entry: DatasetEntry, targetLanguage?: string | null): ConvertedEntry | null {
   /**
    * Convert a single dataset entry to the messages format.
    * Returns null if entry should be skipped.
    */
+  // Filter by language if specified
+  if (targetLanguage && entry.language !== targetLanguage) {
+    return null;
+  }
+
   // Skip REDACTED prompts (require external dataset reconstruction)
   if (entry.prompt === "REDACTED") {
     return null;
@@ -149,7 +154,9 @@ function convertEntry(entry: DatasetEntry): ConvertedEntry | null {
 
 async function processJsonlFile(
   inputPath: string,
-  outputPath: string
+  outputPath: string,
+  language?: string | null,
+  limit?: number | null
 ): Promise<{ converted: number; skipped: number }> {
   /**
    * Process a JSONL file line by line and convert entries.
@@ -166,9 +173,16 @@ async function processJsonlFile(
 
   return new Promise((resolve, reject) => {
     rl.on("line", (line) => {
+      // Check limit
+      if (limit && converted >= limit) {
+        rl.close();
+        rl.removeAllListeners("line"); // Stop processing lines
+        return;
+      }
+
       try {
         const entry: DatasetEntry = JSON.parse(line);
-        const convertedEntry = convertEntry(entry);
+        const convertedEntry = convertEntry(entry, language);
 
         if (convertedEntry === null) {
           skipped++;
@@ -214,6 +228,21 @@ async function downloadDataset(): Promise<string | null> {
 async function main() {
   console.log("\n=== Adapt Nemotron Safety Guard Dataset to Messages Format ===\n");
 
+  // Parse command line arguments
+  const args = process.argv.slice(2);
+  let language: string = "en";
+  let limit: number = 10000;
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--language" && i + 1 < args.length) {
+      language = args[i + 1];
+      i++;
+    } else if (args[i] === "--limit" && i + 1 < args.length) {
+      limit = parseInt(args[i + 1], 10);
+      i++;
+    }
+  }
+
   // Get script directory (works in both CommonJS and ES modules)
   const scriptDir = path.dirname(process.argv[1] || ".");
   const datasetFile = path.join(scriptDir, "Nemotron-Safety-Guard-Dataset-v3.jsonl");
@@ -241,7 +270,15 @@ async function main() {
   console.log(`   File size: ${(stats.size / 1024 / 1024).toFixed(2)} MB\n`);
 
   console.log("2. Converting entries to messages format...");
-  const { converted, skipped } = await processJsonlFile(datasetFile, outputFile);
+  if (language) {
+    console.log(`   Filter: Language = ${language}`);
+  }
+  if (limit) {
+    console.log(`   Limit: ${limit} entries`);
+  }
+
+  // Pass arguments to processJsonlFile
+  const { converted, skipped } = await processJsonlFile(datasetFile, outputFile, language, limit);
 
   console.log(`   ✓ Converted ${converted} entries`);
   console.log(`   ✓ Skipped ${skipped} entries (REDACTED or empty)`);

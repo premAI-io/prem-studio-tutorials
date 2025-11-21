@@ -1,0 +1,15 @@
+{
+  "name": "two-step-finetuning",
+  "version": "1.0.0",
+  "description": "Two-Step Fine-Tuning Tutorial",
+  "type": "module",
+  "scripts": {
+    "start": "bun script.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}
+
