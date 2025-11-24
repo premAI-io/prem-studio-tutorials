@@ -143,8 +143,7 @@ def main():
     print("5. Selecting Models...")
     selected_experiments = []
     
-    # We prefer 'recommended_models' which has specific params for full/lora
-    # If not present, fallback to 'recommended_experiments' (legacy) or defaults
+    # 'recommended_models' contains the list of all finetunable models, with the recommended hyperparameters for each model.
     rec_models = recs.get("recommended_models", [])
     
     if rec_models:
