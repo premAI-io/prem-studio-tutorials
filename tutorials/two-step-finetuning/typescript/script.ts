@@ -316,7 +316,8 @@ async function main() {
     let currentParams = { ...defaultLoraParams };
     
     for (const rec of recModels2) {
-      if (rec.base_model_id && ftModel.base.includes(rec.base_model_id)) {
+      const baseModelId = rec.base_model_id;
+      if (baseModelId && ftModel.base === baseModelId) {
         const p = rec.lora_hyperparameters || {};
         if (p.batch_size) currentParams.batch_size = p.batch_size;
         if (p.learning_rate_multiplier) currentParams.learning_rate_multiplier = p.learning_rate_multiplier;
