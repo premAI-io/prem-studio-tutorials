@@ -167,7 +167,7 @@ async function main() {
   console.log("5. Selecting Models...");
   const selectedExperiments: any[] = [];
   
-  // Prefer 'recommended_models' which has specific params for full/lora
+  // 'recommended_models' contains the list of all finetunable models, with the recommended hyperparameters for each model.
   const recModels = recs.recommended_models || [];
   
   if (recModels.length > 0) {
