@@ -282,6 +282,8 @@ Provide your evaluation in the following JSON format (output ONLY the JSON, no o
             break
 
     print("✓ Recommendations ready\n")
+    recommended_count = len(recs.get("recommended_models", []))
+    print(f"   Recommended experiments: {len(recs['recommended_experiments'])}, Total models: {recommended_count}\n")
 
     # Step 7: Launch new fine-tuning job
     print("=== Step 7: Launching new fine-tuning job ===\n")

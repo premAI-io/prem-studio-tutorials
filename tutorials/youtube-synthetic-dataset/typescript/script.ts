@@ -160,8 +160,8 @@ async function main() {
   }
 
   console.log("   ✓ Recommended experiments:");
-  const recommendedCount = recs.recommended_experiments.filter((e: any) => e.recommended).length;
-  console.log(`   Total experiments: ${recs.recommended_experiments.length}, Recommended: ${recommendedCount}`);
+  const recommendedCount = recs.recommended_models?.length || 0;
+  console.log(`   Recommended experiments: ${recs.recommended_experiments.length}, Total models: ${recommendedCount}`);
   recs.recommended_experiments.forEach((e: any) => {
     if (e.recommended) {
       console.log(`     - ${e.base_model_id} (LoRA: ${e.lora})`);

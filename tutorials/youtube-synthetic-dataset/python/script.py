@@ -155,8 +155,8 @@ def main():
             break
 
     print("   ✓ Recommended experiments:")
-    recommended_count = sum(1 for e in recs["recommended_experiments"] if e["recommended"])
-    print(f"   Total experiments: {len(recs['recommended_experiments'])}, Recommended: {recommended_count}")
+    recommended_count = len(recs.get("recommended_models", []))
+    print(f"   Recommended experiments: {len(recs['recommended_experiments'])}, Total models: {recommended_count}")
     for e in recs["recommended_experiments"]:
         if e["recommended"]:
             print(f"     - {e['base_model_id']} (LoRA: {e['lora']})")
