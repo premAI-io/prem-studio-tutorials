@@ -175,7 +175,7 @@ def main():
     # Extract the finetuned model ID
     finetuned_model_id = None
     for exp in full_ft_result["experiments"]:
-        if exp.get("status") == "completed" and exp.get("model_id"):
+        if exp.get("status") == "succeeded" and exp.get("model_id"):
             finetuned_model_id = exp["model_id"]
             break
     
@@ -246,7 +246,7 @@ def main():
     # Extract the final model ID
     final_model_id = None
     for exp in lora_ft_result["experiments"]:
-        if exp.get("status") == "completed" and exp.get("model_id"):
+        if exp.get("status") == "succeeded" and exp.get("model_id"):
             final_model_id = exp["model_id"]
             break
 

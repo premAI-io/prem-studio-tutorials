@@ -203,7 +203,7 @@ async function main() {
   // Extract the finetuned model ID
   let finetunedModelId: string | null = null;
   for (const exp of fullFtResult.experiments) {
-    if (exp.status === "completed" && exp.model_id) {
+    if (exp.status === "succeeded" && exp.model_id) {
       finetunedModelId = exp.model_id;
       break;
     }
@@ -275,7 +275,7 @@ async function main() {
   // Extract the final model ID
   let finalModelId: string | null = null;
   for (const exp of loraFtResult.experiments) {
-    if (exp.status === "completed" && exp.model_id) {
+    if (exp.status === "succeeded" && exp.model_id) {
       finalModelId = exp.model_id;
       break;
     }
