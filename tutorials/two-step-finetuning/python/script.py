@@ -282,17 +282,18 @@ def main():
         current_params = default_lora_params.copy()
         
         for rec in rec_models_2:
-            if rec.get("base_model_id") and ft_model["base"] in rec.get("base_model_id"):
-                 p = rec.get("lora_hyperparameters", {})
-                 if p:
-                     current_params["batch_size"] = p.get("batch_size", 1)
-                     current_params["learning_rate_multiplier"] = p.get("learning_rate_multiplier", 0.0002)
-                 break
+            base_model_id = rec.get("base_model_id")
+            if base_model_id and ft_model["base"] == base_model_id:
+                p = rec.get("lora_hyperparameters", {})
+                if p:
+                    current_params["batch_size"] = p.get("batch_size", 1)
+                    current_params["learning_rate_multiplier"] = p.get("learning_rate_multiplier", 0.0002)
+                break
         
         exp_config = {
             "base_model_id": ft_model["id"],
             "lora": True,
-            "n_epochs": 2, # Enforce 2 epochs as requested
+            "n_epochs": 2,
             "batch_size": current_params["batch_size"],
             "learning_rate_multiplier": current_params["learning_rate_multiplier"]
         }
