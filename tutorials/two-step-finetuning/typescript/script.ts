@@ -229,7 +229,7 @@ async function main() {
 
   const finetunedModels: any[] = [];
   for (const exp of job1Result.experiments || []) {
-    if (exp.status === "completed") {
+    if (exp.status === "succeeded") {
       finetunedModels.push({
         id: exp.model_id,
         base: exp.base_model_id,
@@ -353,7 +353,7 @@ async function main() {
   console.log("\n=== Two-Step Fine-Tuning Complete! ===");
   console.log("Final Models:");
   for (const exp of job2Result.experiments || []) {
-    if (exp.status === "completed") {
+    if (exp.status === "succeeded") {
       console.log(` - ${exp.model_id}`);
     }
   }
