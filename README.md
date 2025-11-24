@@ -1,6 +1,22 @@
 # Prem Studio Tutorials
 
-Hands-on tutorials showing how to build, fine-tune, evaluate, and automate workflows in Prem Studio—featuring code examples in Python, TypeScript, and Jupyter notebooks.
+Hands-on tutorials showing how to build, fine-tune, evaluate, and automate workflows in Prem Studio—featuring code examples in Python and TypeScript.
+
+## TUTORIALS' OVERVIEW
+
+- **[Continuous Fine-Tuning](tutorials/continuous-finetuning/)** - Automate model improvement using traces and evaluation feedback to continuously refine fine-tuned models.
+
+- **[Guarding BYOE](tutorials/guarding-byoe/)** - Build and deploy custom evaluation servers for safety guardrail models with flexible scoring strategies.
+
+- **[Nemotron Safety Dataset Adaptation](tutorials/nemotron-safety-dataset-adaptation/)** - Convert the Nemotron Safety Guard Dataset to the messages format required for fine-tuning.
+
+- **[PDF Synthetic Dataset](tutorials/pdf-synthetic-dataset/)** - Generate synthetic training datasets from PDF documents for structured data extraction tasks.
+
+- **[Two-Step Fine-Tuning](tutorials/two-step-finetuning/)** - Perform full fine-tuning followed by LoRA fine-tuning to progressively improve model performance on specific tasks.
+
+- **[Web Synthetic Safety Dataset](tutorials/web-synthetic-safety-dataset/)** - Generate safety classification datasets from web sources using synthetic Q&A generation.
+
+- **[YouTube Synthetic Dataset](tutorials/youtube-synthetic-dataset/)** - Generate synthetic training datasets from YouTube video transcripts for structured information extraction.
 
 ## Tutorial Format
 
@@ -35,7 +51,6 @@ Each tutorial is organized in its own directory under `/tutorials/`, following t
         python/            # Python implementation
             script.py
             requirements.txt
-            notebook.ipynb
         typescript/        # TypeScript implementation
             script.ts
             package.json
