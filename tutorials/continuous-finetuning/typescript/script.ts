@@ -269,6 +269,8 @@ Provide your evaluation in the following JSON format (output ONLY the JSON, no o
   }
 
   console.log("✓ Recommendations ready\n");
+  const recommendedCount = recs.recommended_models?.length || 0;
+  console.log(`   Recommended experiments: ${recs.recommended_experiments.length}, Total models: ${recommendedCount}\n`);
 
   // Step 7: Launch new fine-tuning job
   console.log("=== Step 7: Launching new fine-tuning job ===\n");
