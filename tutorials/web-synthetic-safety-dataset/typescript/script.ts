@@ -27,13 +27,14 @@ if (!API_KEY) {
 }
 
 async function api(endpoint: string, method: string = "GET", options: RequestInit = {}) {
+  const { headers: extraHeaders, ...restOptions } = options;
   const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...restOptions,
     method,
     headers: {
       Authorization: `Bearer ${API_KEY}`,
-      ...options.headers,
+      ...(extraHeaders || {}),
     },
-    ...options,
   });
 
   if (!response.ok) {
