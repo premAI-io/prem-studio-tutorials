@@ -110,7 +110,6 @@ async function main() {
 
   // Create project
   console.log("1. Creating project...");
-  console.log(API_KEY);
   const project = await api("/api/v1/public/projects/create", "POST", {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
