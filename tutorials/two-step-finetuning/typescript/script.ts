@@ -32,13 +32,14 @@ async function api(endpoint: string, method: string = "GET", options: RequestIni
     process.exit(1);
   }
 
+  const { headers: extraHeaders, ...restOptions } = options;
   const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...restOptions,
     method,
     headers: {
       Authorization: `Bearer ${API_KEY}`,
-      ...options.headers,
+      ...(extraHeaders || {}),
     },
-    ...options,
   });
 
   if (!response.ok) {

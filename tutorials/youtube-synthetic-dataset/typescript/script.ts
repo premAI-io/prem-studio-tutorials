@@ -30,13 +30,14 @@ if (!API_KEY) {
 }
 
 async function api(endpoint: string, method: string = "GET", options: RequestInit = {}) {
+  const { headers: extraHeaders, ...restOptions } = options;
   const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...restOptions,
     method,
     headers: {
       Authorization: `Bearer ${API_KEY}`,
-      ...options.headers,
+      ...(extraHeaders || {}),
     },
-    ...options,
   });
 
   if (!response.ok) {
@@ -109,6 +110,7 @@ async function main() {
 
   // Create project
   console.log("1. Creating project...");
+  console.log(API_KEY);
   const project = await api("/api/v1/public/projects/create", "POST", {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
