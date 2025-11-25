@@ -15,6 +15,3 @@ tutorials/nemotron-safety-dataset-adaptation/converted_dataset.jsonl
 
 .env
 launch.json
-
-*/**/tsconfig.json
-*/**/package-lock.json
