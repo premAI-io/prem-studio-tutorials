@@ -232,7 +232,8 @@ async function main() {
   for (const exp of job1Result.experiments || []) {
     if (exp.status === "succeeded") {
       finetunedModels.push({
-        id: exp.model_id,
+        experiment_id: exp.id,  // Store experiment ID for refinetuning
+        model_id: exp.model_id,
         base: exp.base_model_id,
       });
     }
@@ -326,14 +327,17 @@ async function main() {
       }
     }
 
+    // Use refinetune_from_experiment_id to refinetune from the previous experiment
+    // base_model_id must remain the original base model id per the API
     loraExperiments.push({
-      base_model_id: ftModel.id,
+      base_model_id: ftModel.base,  // Ensure we reference the true base model id
+      refinetune_from_experiment_id: ftModel.experiment_id,  // The experiment ID from step 1
       lora: true,
       n_epochs: 2,
       batch_size: currentParams.batch_size,
       learning_rate_multiplier: currentParams.learning_rate_multiplier
     });
-    console.log(`   Configured LoRA for: ${ftModel.id} (Batch: ${currentParams.batch_size}, LR: ${currentParams.learning_rate_multiplier})`);
+    console.log(`   Configured LoRA refinetuning for base ${ftModel.base} (exp ${ftModel.experiment_id}, model ${ftModel.model_id}) (Batch: ${currentParams.batch_size}, LR: ${currentParams.learning_rate_multiplier})`);
   }
 
   // 6. Start Experiments
