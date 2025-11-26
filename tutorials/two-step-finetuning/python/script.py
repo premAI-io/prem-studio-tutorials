@@ -198,9 +198,10 @@ def main():
     
     finetuned_models = []
     for exp in job1_result.get("experiments", []):
-        if exp.get("status") == "completed":
+        if exp.get("status") == "succeeded":
             finetuned_models.append({
-                "id": exp.get("model_id"),
+                "experiment_id": exp.get("id"),  # Store experiment ID for refinetuning
+                "model_id": exp.get("model_id"),
                 "base": exp.get("base_model_id")
             })
             
@@ -276,7 +277,7 @@ def main():
 
     for ft_model in finetuned_models:
         # We can try to match the *original* base model to get specific params if possible
-        # but the `finetuned_models` list stores {id, base}. `base` is what we matched earlier.
+        # but the `finetuned_models` list stores {experiment_id, model_id, base}. `base` keeps the true base model id.
         
         # Look for specific params for this base architecture in current recommendations
         current_params = default_lora_params.copy()
@@ -290,8 +291,11 @@ def main():
                     current_params["learning_rate_multiplier"] = p.get("learning_rate_multiplier", 0.0002)
                 break
         
+        # Use refinetune_from_experiment_id to refinetune from the previous experiment
+        # base_model_id must stay the original base model id per API contract
         exp_config = {
-            "base_model_id": ft_model["id"],
+            "base_model_id": ft_model["base"],  # Ensure we keep referencing the base model id
+            "refinetune_from_experiment_id": ft_model["experiment_id"],  # The experiment ID from step 1
             "lora": True,
             "n_epochs": 2,
             "batch_size": current_params["batch_size"],
@@ -299,7 +303,11 @@ def main():
         }
         
         lora_experiments.append(exp_config)
-        print(f"   Configured LoRA for: {ft_model['id']} (Batch: {exp_config['batch_size']}, LR: {exp_config['learning_rate_multiplier']})")
+        print(
+            f"   Configured LoRA refinetuning for base {ft_model['base']} "
+            f"(from exp {ft_model['experiment_id']}, model {ft_model['model_id']}) "
+            f"(Batch: {exp_config['batch_size']}, LR: {exp_config['learning_rate_multiplier']})"
+        )
 
     # 6. Start Experiments
     print(f"6. Starting LoRA Experiments...")
@@ -316,7 +324,7 @@ def main():
     print("\n=== Two-Step Fine-Tuning Complete! ===")
     print("Final Models:")
     for exp in job2_result.get("experiments", []):
-        if exp.get("status") == "completed":
+        if exp.get("status") == "succeeded":
             print(f" - {exp.get('model_id')}")
 
     print("\nFor evaluation, please refer to the Guarding BYOE tutorial.")
