@@ -38,9 +38,21 @@ By the end of this tutorial, you will:
 
 ## Steps
 
-### Preparation: Generate Datasets
+### Preparation: Datasets
 
-Before running the script, you need to generate the datasets using the [Nemotron Safety Dataset Adaptation](../nemotron-safety-dataset-adaptation/README.md) tutorial.
+You have **two options** for obtaining the datasets needed for this tutorial:
+
+#### Option 1: Use Ready-Made Datasets (Quick Start)
+
+The `resources/` folder contains pre-generated datasets that you can use immediately:
+- **`english_dataset.jsonl`** (10k samples) - For full fine-tuning
+- **`target_language_dataset.jsonl`** (5k samples) - For LoRA fine-tuning
+
+These datasets are ready to use with the scripts in this tutorial.
+
+#### Option 2: Generate Custom Datasets
+
+If you need datasets in specific languages or with different sample sizes, use the [Nemotron Safety Dataset Adaptation](../nemotron-safety-dataset-adaptation/README.md) tutorial to generate them:
 
 1. **English Dataset (10k samples)**:
    ```bash
