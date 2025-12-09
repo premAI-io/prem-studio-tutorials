@@ -163,7 +163,7 @@ def main():
                 
                 exp_config = {
                     "base_model_id": base_id,
-                    "lora": False, # Ensure Full FT
+                    "training_type": "full", # Ensure Full FT
                     "n_epochs": 3, # Override epochs as requested in tutorial
                     "batch_size": params.get("batch_size", 1),
                     "learning_rate_multiplier": params.get("learning_rate_multiplier", 0.00002)
@@ -178,7 +178,7 @@ def main():
         for target in TARGET_MODELS:
              selected_experiments.append({
                  "base_model_id": target,
-                 "lora": False,
+                 "training_type": "full",
                  "n_epochs": 3,
                  "learning_rate_multiplier": 0.00002, 
                  "batch_size": 1
@@ -296,7 +296,7 @@ def main():
         exp_config = {
             "base_model_id": ft_model["base"],  # Ensure we keep referencing the base model id
             "refinetune_from_experiment_id": ft_model["experiment_id"],  # The experiment ID from step 1
-            "lora": True,
+            "training_type": "lora",
             "n_epochs": 2,
             "batch_size": current_params["batch_size"],
             "learning_rate_multiplier": current_params["learning_rate_multiplier"]

@@ -189,7 +189,7 @@ async function main() {
         
         selectedExperiments.push({
           base_model_id: baseId,
-          lora: false, // Ensure Full FT
+          training_type: "full", // Ensure Full FT
           n_epochs: 3, // Override epochs as requested
           batch_size: params.batch_size || 1,
           learning_rate_multiplier: params.learning_rate_multiplier || 0.00002
@@ -205,7 +205,7 @@ async function main() {
     for (const target of TARGET_MODELS) {
       selectedExperiments.push({
         base_model_id: target,
-        lora: false,
+        training_type: "full",
         n_epochs: 3,
         learning_rate_multiplier: 0.00002,
         batch_size: 1,
@@ -332,7 +332,7 @@ async function main() {
     loraExperiments.push({
       base_model_id: ftModel.base,  // Ensure we reference the true base model id
       refinetune_from_experiment_id: ftModel.experiment_id,  // The experiment ID from step 1
-      lora: true,
+      training_type: "lora",
       n_epochs: 2,
       batch_size: currentParams.batch_size,
       learning_rate_multiplier: currentParams.learning_rate_multiplier

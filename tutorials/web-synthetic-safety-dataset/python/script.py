@@ -154,7 +154,8 @@ def main():
     print(f"   Recommended experiments: {len(recs['recommended_experiments'])}, Total models: {recommended_count}")
     for e in recs["recommended_experiments"]:
         if e["recommended"]:
-            print(f"     - {e['base_model_id']} (LoRA: {e['lora']})")
+            training_type = e.get("training_type", "unknown")
+            print(f"     - {e['base_model_id']} (Training Type: {training_type})")
     print()
 
     # Create fine-tuning job
