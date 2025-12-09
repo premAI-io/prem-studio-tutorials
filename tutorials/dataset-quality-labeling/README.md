@@ -10,7 +10,6 @@
 - Prem API key exported as `API_KEY`
 - Basic understanding of dataset quality assessment
 - Python 3.8+ or Node.js 18+ installed
-- An existing dataset with datapoints to label
 
 ## Setup Environment
 
@@ -53,13 +52,19 @@ By the end of this tutorial, you will:
 
 ## Steps
 
-### Step 1: Prepare Dataset
+### Step 1: Create Project
 
-Ensure you have a dataset with datapoints ready to be labeled. You can use an existing dataset ID or create a new dataset from a JSONL file.
+Create a new project in Prem Studio to organize your datasets and labeling workflow.
 
-**API Endpoint:** [`GET /api/v1/public/datasets/{dataset_id}`](https://docs.premai.io/api-reference/datasets/get-datasets-dataset-id)
+**API Endpoint:** [`POST /api/v1/public/projects/create`](https://docs.premai.io/api-reference/projects/post-projects-create)
 
-### Step 2: Quality Labels Configuration
+### Step 2: Upload Sample Dataset
+
+The script automatically uploads the sample dataset from `resources/sample_dataset.jsonl`. This dataset contains technical Q&A pairs that will be labeled based on quality criteria.
+
+**API Endpoint:** [`POST /api/v1/public/datasets/create-from-jsonl`](https://docs.premai.io/api-reference/datasets/post-datasets-create-from-jsonl)
+
+### Step 3: Quality Labels Configuration
 
 The script uses predefined quality labels that are tailored for technical Q&A datasets. The labels are:
 - **excellent**: Comprehensive, accurate, well-structured responses with deep understanding
@@ -69,19 +74,19 @@ The script uses predefined quality labels that are tailored for technical Q&A da
 
 These labels are statically defined in the script and are appropriate for assessing the quality of technical documentation and Q&A datapoints.
 
-### Step 3: Create Label Definitions
+### Step 4: Create Label Definitions
 
 Create the label definitions in your dataset. This step defines what each quality label means and prepares the dataset for auto-labeling.
 
 **API Endpoint:** [`POST /api/v1/public/datasets/{dataset_id}/create-labels`](https://docs.premai.io/api-reference/datasets/post-datasets-create-labels)
 
-### Step 4: Start Auto-Labeling
+### Step 5: Start Auto-Labeling
 
 Start the automatic labeling process. The system will assess each datapoint and assign the appropriate quality label based on the predefined criteria.
 
 **API Endpoint:** [`POST /api/v1/public/datasets/{dataset_id}/start-auto-labeling`](https://docs.premai.io/api-reference/datasets/post-datasets-start-auto-labeling)
 
-### Step 5: Verify Labels
+### Step 6: Verify Labels
 
 Check the labeled dataset to verify that datapoints have been correctly assigned quality labels. You can filter and analyze your dataset based on these quality levels.
 

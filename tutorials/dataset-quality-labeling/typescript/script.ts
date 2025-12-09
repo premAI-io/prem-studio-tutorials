@@ -3,9 +3,19 @@
  * Automatically label datapoints in a dataset based on quality criteria.
  */
 
+import * as fs from "fs";
+import * as path from "path";
 
 // Base URL for Prem Studio API - change this to point to a different environment if needed
 const BASE_URL = "https://studio.premai.io";
+
+// Path to sample dataset - using Bun's file path resolution
+const SAMPLE_DATASET_PATH = path.resolve(
+  import.meta.dir,
+  "..",
+  "resources",
+  "sample_dataset.jsonl"
+);
 
 const API_KEY = process.env.API_KEY;
 
@@ -52,6 +62,36 @@ function defineQualityLabels(): Record<string, string> {
   }
 
   return qualityLabels;
+}
+
+async function createProject(projectName: string, goal: string): Promise<string> {
+  const result = await api("/api/v1/public/projects/create", "POST", {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: projectName, goal }),
+  });
+  return result.project_id;
+}
+
+async function uploadDatasetFromJsonl(
+  projectId: string,
+  datasetName: string,
+  filePath: string
+): Promise<string> {
+  console.log(`   Uploading ${datasetName} from ${path.basename(filePath)}...`);
+
+  const fileContent = fs.readFileSync(filePath);
+  const blob = new Blob([fileContent], { type: "application/json" });
+
+  const formData = new FormData();
+  formData.append("file", blob, path.basename(filePath));
+  formData.append("project_id", projectId);
+  formData.append("name", datasetName);
+
+  const result = await api("/api/v1/public/datasets/create-from-jsonl", "POST", {
+    body: formData,
+  });
+
+  return result.dataset_id;
 }
 
 async function getDatasetInfo(datasetId: string): Promise<any> {
@@ -104,34 +144,49 @@ async function startAutoLabeling(datasetId: string): Promise<any> {
 async function main() {
   console.log("\n=== Dataset Quality Labeling ===\n");
 
-  // Step 1: Dataset ID (static value - replace with your actual dataset ID)
-  console.log("Step 1: Dataset Selection");
-  const datasetId = "your-dataset-id-here"; // Replace with your actual dataset ID
-
-  console.log(`   Using dataset ID: ${datasetId}`);
-
-  // Verify dataset exists
-  console.log("   Verifying dataset...");
-  let dataset: any;
+  // Step 1: Create project
+  console.log("Step 1: Creating Project");
+  let projectId: string;
   try {
-    dataset = await getDatasetInfo(datasetId);
-    console.log(`   ✓ Dataset found: ${dataset.name || "N/A"}`);
-    console.log(`   ✓ Datapoints: ${dataset.datapoints_count || 0}`);
+    projectId = await createProject(
+      "Quality Labeling Project",
+      "Label dataset datapoints based on quality criteria"
+    );
+    console.log(`   ✓ Project created: ${projectId}\n`);
   } catch (e: any) {
-    console.log(`\n✗ Error: Could not access dataset. ${e.message}`);
-    console.log("   Please update the datasetId variable in the script with your actual dataset ID.");
+    console.log(`\n✗ Error creating project: ${e.message}`);
     process.exit(1);
   }
 
-  if ((dataset.datapoints_count || 0) === 0) {
-    console.log("\n✗ Error: Dataset has no datapoints to label.");
+  // Step 2: Upload sample dataset
+  console.log("Step 2: Uploading Sample Dataset");
+  if (!fs.existsSync(SAMPLE_DATASET_PATH)) {
+    console.log(`\n✗ Error: Sample dataset not found at ${SAMPLE_DATASET_PATH}`);
     process.exit(1);
   }
 
-  console.log();
+  let datasetId: string;
+  try {
+    datasetId = await uploadDatasetFromJsonl(
+      projectId,
+      "Quality Labeling Sample Dataset",
+      SAMPLE_DATASET_PATH
+    );
+    console.log(`   ✓ Dataset created: ${datasetId}`);
 
-  // Step 2: Create label definitions
-  console.log("Step 2: Create Label Definitions");
+    // Wait a moment for dataset to be ready
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Verify dataset
+    const dataset = await getDatasetInfo(datasetId);
+    console.log(`   ✓ Datapoints: ${dataset.datapoints_count || 0}\n`);
+  } catch (e: any) {
+    console.log(`\n✗ Error uploading dataset: ${e.message}`);
+    process.exit(1);
+  }
+
+  // Step 3: Define quality labels
+  console.log("Step 3: Define Quality Labels");
   const qualityLabels = defineQualityLabels();
 
   console.log(`\n   Summary of labels:`);
@@ -140,8 +195,8 @@ async function main() {
   }
   console.log();
 
-  // Step 3: Create labels
-  console.log("Step 3: Creating Labels");
+  // Step 4: Create labels
+  console.log("Step 4: Creating Label Definitions");
   try {
     const createResult = await createLabels(datasetId, qualityLabels);
     console.log(`   ✓ ${createResult.message || "Labels created successfully"}`);
@@ -150,8 +205,8 @@ async function main() {
     process.exit(1);
   }
 
-  // Step 4: Start auto-labeling
-  console.log("\nStep 4: Starting Auto-Labeling");
+  // Step 5: Start auto-labeling
+  console.log("\nStep 5: Starting Auto-Labeling");
   try {
     const labelingResult = await startAutoLabeling(datasetId);
     console.log(
@@ -164,7 +219,8 @@ async function main() {
   }
 
   console.log("\n✓ Done!");
-  console.log(`\nDataset: ${datasetId}`);
+  console.log(`\nProject: ${projectId}`);
+  console.log(`Dataset: ${datasetId}`);
   console.log(`Quality labels applied: ${Object.keys(qualityLabels).join(", ")}\n`);
 }
 

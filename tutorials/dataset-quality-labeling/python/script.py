@@ -7,6 +7,7 @@ Automatically label datapoints in a dataset based on quality criteria.
 import os
 import sys
 import requests
+from pathlib import Path
 
 # Base URL for Prem Studio API - change this to point to a different environment if needed
 BASE_URL = "https://studio.premai.io"
@@ -16,6 +17,10 @@ API_KEY = os.getenv("API_KEY")
 if not API_KEY:
     print("Error: API_KEY environment variable is required")
     exit(1)
+
+# Path to sample dataset
+SCRIPT_DIR = Path(__file__).parent
+SAMPLE_DATASET_PATH = SCRIPT_DIR / ".." / "resources" / "sample_dataset.jsonl"
 
 
 def api(endpoint: str, method: str = "GET", **kwargs):
@@ -50,6 +55,29 @@ def define_quality_labels() -> dict:
         print(f"     - {label_name}: {description[:60]}...")
     
     return quality_labels
+
+
+def create_project(project_name: str, goal: str) -> str:
+    """Create a new project"""
+    result = api(
+        "/api/v1/public/projects/create",
+        method="POST",
+        headers={"Content-Type": "application/json"},
+        json={"name": project_name, "goal": goal}
+    )
+    return result["project_id"]
+
+
+def upload_dataset_from_jsonl(project_id: str, dataset_name: str, jsonl_path: Path) -> str:
+    """Upload a dataset from a JSONL file"""
+    print(f"   Uploading {dataset_name} from {jsonl_path}...")
+    
+    with open(jsonl_path, "rb") as f:
+        files = {"file": (jsonl_path.name, f, "application/json")}
+        data = {"project_id": project_id, "name": dataset_name}
+        result = api("/api/v1/public/datasets/create-from-jsonl", method="POST", files=files, data=data)
+    
+    return result["dataset_id"]
 
 
 def get_dataset_info(dataset_id: str) -> dict:
@@ -100,31 +128,45 @@ def start_auto_labeling(dataset_id: str) -> dict:
 def main():
     print("\n=== Dataset Quality Labeling ===\n")
     
-    # Step 1: Dataset ID (static value - replace with your actual dataset ID)
-    print("Step 1: Dataset Selection")
-    dataset_id = "your-dataset-id-here"  # Replace with your actual dataset ID
-    
-    print(f"   Using dataset ID: {dataset_id}")
-    
-    # Verify dataset exists
-    print("   Verifying dataset...")
+    # Step 1: Create project
+    print("Step 1: Creating Project")
     try:
-        dataset = get_dataset_info(dataset_id)
-        print(f"   ✓ Dataset found: {dataset.get('name', 'N/A')}")
-        print(f"   ✓ Datapoints: {dataset.get('datapoints_count', 0)}")
+        project_id = create_project(
+            "Quality Labeling Project",
+            "Label dataset datapoints based on quality criteria"
+        )
+        print(f"   ✓ Project created: {project_id}\n")
     except Exception as e:
-        print(f"\n✗ Error: Could not access dataset. {e}")
-        print("   Please update the dataset_id variable in the script with your actual dataset ID.")
+        print(f"\n✗ Error creating project: {e}")
         exit(1)
     
-    if dataset.get('datapoints_count', 0) == 0:
-        print("\n✗ Error: Dataset has no datapoints to label.")
+    # Step 2: Upload sample dataset
+    print("Step 2: Uploading Sample Dataset")
+    if not SAMPLE_DATASET_PATH.exists():
+        print(f"\n✗ Error: Sample dataset not found at {SAMPLE_DATASET_PATH}")
         exit(1)
     
-    print()
+    try:
+        dataset_id = upload_dataset_from_jsonl(
+            project_id,
+            "Quality Labeling Sample Dataset",
+            SAMPLE_DATASET_PATH
+        )
+        print(f"   ✓ Dataset created: {dataset_id}")
+        
+        # Wait a moment for dataset to be ready
+        import time
+        time.sleep(2)
+        
+        # Verify dataset
+        dataset = get_dataset_info(dataset_id)
+        print(f"   ✓ Datapoints: {dataset.get('datapoints_count', 0)}\n")
+    except Exception as e:
+        print(f"\n✗ Error uploading dataset: {e}")
+        exit(1)
     
-    # Step 2: Create label definitions
-    print("Step 2: Create Label Definitions")
+    # Step 3: Define quality labels
+    print("Step 3: Define Quality Labels")
     quality_labels = define_quality_labels()
     
     print(f"\n   Summary of labels:")
@@ -132,8 +174,8 @@ def main():
         print(f"     - {label_name}: {description[:50]}...")
     print()
     
-    # Step 3: Create labels
-    print("Step 3: Creating Labels")
+    # Step 4: Create labels
+    print("Step 4: Creating Label Definitions")
     try:
         create_result = create_labels(dataset_id, quality_labels)
         print(f"   ✓ {create_result.get('message', 'Labels created successfully')}")
@@ -141,8 +183,8 @@ def main():
         print(f"\n✗ Error creating labels: {e}")
         exit(1)
     
-    # Step 4: Start auto-labeling
-    print("\nStep 4: Starting Auto-Labeling")
+    # Step 5: Start auto-labeling
+    print("\nStep 5: Starting Auto-Labeling")
     try:
         labeling_result = start_auto_labeling(dataset_id)
         print(f"   ✓ {labeling_result.get('message', 'Auto-labeling started successfully')}")
@@ -152,7 +194,8 @@ def main():
         exit(1)
     
     print("\n✓ Done!")
-    print(f"\nDataset: {dataset_id}")
+    print(f"\nProject: {project_id}")
+    print(f"Dataset: {dataset_id}")
     print(f"Quality labels applied: {', '.join(quality_labels.keys())}\n")
 
 
