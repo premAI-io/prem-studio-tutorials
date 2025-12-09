@@ -156,7 +156,8 @@ async function main() {
   console.log(`   Recommended experiments: ${recs.recommended_experiments.length}, Total models: ${recommendedCount}`);
   recs.recommended_experiments.forEach((e: any) => {
     if (e.recommended) {
-      console.log(`     - ${e.base_model_id} (LoRA: ${e.lora})`);
+      const trainingType = e.training_type || "unknown";
+      console.log(`     - ${e.base_model_id} (Training Type: ${trainingType})`);
     }
   });
   console.log();

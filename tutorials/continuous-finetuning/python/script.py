@@ -288,10 +288,12 @@ Provide your evaluation in the following JSON format (output ONLY the JSON, no o
     # Step 7: Launch new fine-tuning job
     print("=== Step 7: Launching new fine-tuning job ===\n")
 
-    experiments = [
-        {k: v for k, v in exp.items() if k not in ["recommended", "reason_for_recommendation"]}
-        for exp in recs["recommended_experiments"] if exp["recommended"]
-    ]
+    experiments = []
+    for exp in recs["recommended_experiments"]:
+        if exp["recommended"]:
+            # Remove fields that shouldn't be in the request
+            exp_clean = {k: v for k, v in exp.items() if k not in ["recommended", "reason_for_recommendation"]}
+            experiments.append(exp_clean)
 
     if not experiments:
         print("✗ No recommended experiments found")
