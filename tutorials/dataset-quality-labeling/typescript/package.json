@@ -1,0 +1,15 @@
+{
+  "name": "dataset-quality-labeling",
+  "version": "1.0.0",
+  "description": "Dataset Quality Labeling Tutorial TypeScript implementation",
+  "type": "module",
+  "scripts": {
+    "start": "bun script.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}
+
