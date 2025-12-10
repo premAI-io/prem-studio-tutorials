@@ -10,6 +10,8 @@ Hands-on tutorials showing how to build, fine-tune, evaluate, and automate workf
 
 - **[Nemotron Safety Dataset Adaptation](tutorials/nemotron-safety-dataset-adaptation/)** - Convert the Nemotron Safety Guard Dataset to the messages format required for fine-tuning.
 
+- **[Dataset Quality Labeling](tutorials/dataset-quality-labeling/)** - Automatically label datapoints in your dataset based on quality criteria using predefined quality levels.
+
 - **[PDF Synthetic Dataset](tutorials/pdf-synthetic-dataset/)** - Generate synthetic training datasets from PDF documents for structured data extraction tasks.
 
 - **[Two-Step Fine-Tuning](tutorials/two-step-finetuning/)** - Perform full fine-tuning followed by LoRA fine-tuning to progressively improve model performance on specific tasks.
